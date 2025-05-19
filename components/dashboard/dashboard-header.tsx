@@ -1,7 +1,7 @@
 import type { User } from "@/types/user"
 
 interface DashboardHeaderProps {
-  user: User
+  user?: User
 }
 
 export default function DashboardHeader({ user }: DashboardHeaderProps) {
@@ -16,7 +16,8 @@ export default function DashboardHeader({ user }: DashboardHeaderProps) {
   return (
     <header>
       <h1 className="text-2xl font-bold tracking-tight">
-        {getGreeting()}, {user.name}
+        {getGreeting()}
+        {user?.name ? `, ${user.name}` : ""}
       </h1>
     </header>
   )

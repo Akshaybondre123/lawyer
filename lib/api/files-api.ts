@@ -18,9 +18,6 @@ export async function uploadFile({
   metadata = {},
   onProgress,
 }: UploadFileParams): Promise<FileMetadata> {
-  // In a real implementation, this would use AWS SDK or other APIs
-  // This is a mock implementation for demonstration
-
   // Simulate progress updates
   if (onProgress) {
     let progress = 0
@@ -59,13 +56,8 @@ export async function uploadFile({
  * Get files for a specific case
  */
 export async function getCaseFiles(caseId: string): Promise<FileMetadata[]> {
-  // In a real implementation, this would call an API endpoint
-  // This is a mock implementation for demonstration
-
-  // Simulate network delay
   await new Promise((resolve) => setTimeout(resolve, 800))
 
-  // Mock data
   return [
     {
       id: "file_1",
@@ -110,16 +102,46 @@ export async function getCaseFiles(caseId: string): Promise<FileMetadata[]> {
 }
 
 /**
+ * Get files for a specific client
+ */
+export async function getClientFiles(clientId: string): Promise<FileMetadata[]> {
+  await new Promise((resolve) => setTimeout(resolve, 800))
+
+  return [
+    {
+      id: "file_101",
+      fileName: "client_intro.pdf",
+      fileSize: 204800,
+      fileType: "application/pdf",
+      description: "Initial client brief",
+      uploadedAt: "2025-04-15T10:00:00Z",
+      uploadedBy: "user_1",
+      clientId,
+      storageLocation: "local",
+      encryptionType: undefined,
+      url: "https://example.com/files/file_101/client_intro.pdf",
+    },
+    {
+      id: "file_102",
+      fileName: "photo.png",
+      fileSize: 102400,
+      fileType: "image/png",
+      description: "Client profile photo",
+      uploadedAt: "2025-04-16T12:00:00Z",
+      uploadedBy: "user_2",
+      clientId,
+      storageLocation: "s3",
+      encryptionType: "AES256",
+      url: "https://example.com/files/file_102/photo.png",
+    },
+  ]
+}
+
+/**
  * Delete a file
  */
 export async function deleteFile(fileId: string): Promise<boolean> {
-  // In a real implementation, this would call an API endpoint
-  // This is a mock implementation for demonstration
-
-  // Simulate network delay
   await new Promise((resolve) => setTimeout(resolve, 500))
-
-  // Always return success in this mock
   return true
 }
 
@@ -127,13 +149,7 @@ export async function deleteFile(fileId: string): Promise<boolean> {
  * Download a file
  */
 export async function downloadFile(fileId: string): Promise<Blob> {
-  // In a real implementation, this would call an API endpoint
-  // This is a mock implementation for demonstration
-
-  // Simulate network delay
   await new Promise((resolve) => setTimeout(resolve, 1000))
-
-  // Create a mock PDF blob
   const mockPdfContent = "Mock PDF content"
   return new Blob([mockPdfContent], { type: "application/pdf" })
 }

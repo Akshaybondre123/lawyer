@@ -37,7 +37,7 @@ function NavItem({ href, icon, label, isActive }: NavItemProps) {
       href={href}
       className={cn(
         "flex items-center gap-3 px-3 py-2 rounded-md text-sm transition-colors",
-        isActive ? "bg-gray-100 text-gray-900" : "text-gray-500 hover:text-gray-900 hover:bg-gray-100",
+        isActive ? "bg-white text-gray-900 shadow-sm" : "text-gray-600 hover:text-gray-900 hover:bg-white/50",
       )}
     >
       {icon}
@@ -117,7 +117,7 @@ export default function Sidebar() {
       {/* Sidebar with even higher z-index */}
       <aside
         className={cn(
-          "bg-white border-r border-gray-200 z-[60] transition-all duration-300 ease-in-out",
+          "bg-[#F5F5F5] border-r border-gray-200 z-[60] transition-all duration-300 ease-in-out",
           isMobile ? "fixed top-0 left-0 h-full w-64" : "sticky top-0 h-screen w-64",
           isMobile && !isOpen && "transform -translate-x-full",
         )}
@@ -143,7 +143,19 @@ export default function Sidebar() {
               </button>
             )}
           </div>
-          <nav className="flex-1 p-4 space-y-1 overflow-y-auto scrollbar-hide">
+          <nav
+            className="flex-1 p-4 space-y-1 overflow-y-auto"
+            style={{
+              scrollbarWidth: "none",
+              msOverflowStyle: "none",
+              WebkitScrollbar: { display: "none" },
+            }}
+          >
+            <style jsx>{`
+              nav::-webkit-scrollbar {
+                display: none;
+              }
+            `}</style>
             {navItems.map((item) => (
               <NavItem
                 key={item.href}

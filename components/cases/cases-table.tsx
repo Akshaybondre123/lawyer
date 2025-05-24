@@ -1,46 +1,68 @@
 "use client"
-
-import type React from "react"
 import type { Case, CaseStatus } from "@/types/case"
 
 import { useState, useEffect } from "react"
+import { useForm } from "react-hook-form"
+import { zodResolver } from "@hookform/resolvers/zod"
+import { z } from "zod"
 import { useSearchParams, useRouter } from "next/navigation"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Eye, FileText } from "lucide-react"
+import { Form, FormControl, FormField, FormItem, FormMessage } from "@/components/ui/form"
+import { Eye, FileText, Loader2 } from "lucide-react"
 import { formatDate } from "@/lib/utils"
 import { getCases, updateCaseStatus } from "@/lib/api/cases-api"
 import { useToast } from "@/hooks/use-toast"
 
+const searchFormSchema = z.object({
+  query: z.string().optional(),
+  status: z.enum(["all", "pending", "approved", "rejected"]).default("all"),
+})
+
+type SearchFormData = z.infer<typeof searchFormSchema>
+
+const statusUpdateSchema = z.object({
+  caseId: z.string(),
+  status: z.enum(["pending", "approved", "rejected"]),
+})
+
+type StatusUpdateData = z.infer<typeof statusUpdateSchema>
+
 interface CasesTableProps {
-  initialCases: Case[]
+  initialCases?: Case[]
 }
 
 export default function CasesTable({ initialCases }: CasesTableProps) {
-  const [cases, setCases] = useState<Case[]>(initialCases)
-  const [searchQuery, setSearchQuery] = useState("")
-  const [statusFilter, setStatusFilter] = useState<CaseStatus | "all">("all")
+  const [cases, setCases] = useState<Case[]>(initialCases || [])
   const [isLoading, setIsLoading] = useState(false)
+  const [updatingCases, setUpdatingCases] = useState<Set<string>>(new Set())
 
   const router = useRouter()
   const searchParams = useSearchParams()
   const { toast } = useToast()
+
+  // Search and filter form
+  const searchForm = useForm<SearchFormData>({
+    resolver: zodResolver(searchFormSchema),
+    defaultValues: {
+      query: searchParams?.get("query") || "",
+      status: (searchParams?.get("status") as CaseStatus) || "all",
+    },
+  })
 
   // Load cases with filters
   useEffect(() => {
     const fetchCases = async () => {
       setIsLoading(true)
       try {
-        const status = (searchParams.get("status") as CaseStatus) || "all"
-        setStatusFilter(status)
-
-        const query = searchParams.get("query") || ""
-        setSearchQuery(query)
-
-        const fetchedCases = await getCases({ status, query })
+        const formData = searchForm.getValues()
+        const fetchedCases = await getCases({
+          status: formData.status === "all" ? undefined : formData.status,
+          query: formData.query || undefined,
+        })
         setCases(fetchedCases)
       } catch (error) {
         toast({
@@ -54,33 +76,18 @@ export default function CasesTable({ initialCases }: CasesTableProps) {
     }
 
     fetchCases()
-  }, [searchParams, toast])
+  }, [searchParams, toast, searchForm])
 
-  // Handle search
-  const handleSearch = (e: React.FormEvent) => {
-    e.preventDefault()
-    const params = new URLSearchParams(searchParams)
+  // Handle search form submission
+  const onSearchSubmit = async (data: SearchFormData) => {
+    const params = new URLSearchParams()
 
-    if (searchQuery) {
-      params.set("query", searchQuery)
-    } else {
-      params.delete("query")
+    if (data.query) {
+      params.set("query", data.query)
     }
 
-    router.push(`/cases?${params.toString()}`)
-  }
-
-  // Handle status filter change
-  const handleStatusChange = (value: string) => {
-    const status = value as CaseStatus | "all"
-    setStatusFilter(status)
-
-    const params = new URLSearchParams(searchParams)
-
-    if (status !== "all") {
-      params.set("status", status)
-    } else {
-      params.delete("status")
+    if (data.status !== "all") {
+      params.set("status", data.status)
     }
 
     router.push(`/cases?${params.toString()}`)
@@ -88,8 +95,11 @@ export default function CasesTable({ initialCases }: CasesTableProps) {
 
   // Handle case status update
   const handleStatusUpdate = async (caseId: string, newStatus: CaseStatus) => {
+    setUpdatingCases((prev) => new Set(prev).add(caseId))
+
     try {
-      await updateCaseStatus(caseId, newStatus)
+      const updateData: StatusUpdateData = { caseId, status: newStatus }
+      await updateCaseStatus(updateData.caseId, updateData.status)
 
       // Update local state
       setCases(cases.map((c) => (c.id === caseId ? { ...c, status: newStatus } : c)))
@@ -103,6 +113,12 @@ export default function CasesTable({ initialCases }: CasesTableProps) {
         title: "Error",
         description: "Failed to update case status",
         variant: "destructive",
+      })
+    } finally {
+      setUpdatingCases((prev) => {
+        const newSet = new Set(prev)
+        newSet.delete(caseId)
+        return newSet
       })
     }
   }
@@ -140,46 +156,72 @@ export default function CasesTable({ initialCases }: CasesTableProps) {
 
   return (
     <div className="space-y-4">
-      <div className="flex flex-col sm:flex-row gap-4 justify-between">
-        <form onSubmit={handleSearch} className="flex w-full max-w-sm items-center space-x-2">
-          <Input
-            type="search"
-            placeholder="Search"
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full"
-          />
-          <Button type="submit" variant="outline" size="icon">
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              width="16"
-              height="16"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              className="h-4 w-4"
-            >
-              <circle cx="11" cy="11" r="8" />
-              <path d="m21 21-4.3-4.3" />
-            </svg>
-          </Button>
-        </form>
+      <Form {...searchForm}>
+        <form
+          onSubmit={searchForm.handleSubmit(onSearchSubmit)}
+          className="flex flex-col sm:flex-row gap-4 justify-between"
+        >
+          <div className="flex w-full max-w-sm items-center space-x-2">
+            <FormField
+              control={searchForm.control}
+              name="query"
+              render={({ field }) => (
+                <FormItem className="flex-1 relative">
+                  <FormControl>
+                    <div className="relative">
+                      <Input
+                        placeholder="Search cases..."
+                        {...field}
+                        value={field.value || ""}
+                        className="bg-[#F5F5F5] border-gray-200 pl-10"
+                      />
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        width="16"
+                        height="16"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="2"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400"
+                      >
+                        <circle cx="11" cy="11" r="8" />
+                        <path d="m21 21-4.3-4.3" />
+                      </svg>
+                    </div>
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </div>
 
-        <Select value={statusFilter} onValueChange={handleStatusChange}>
-          <SelectTrigger className="w-[180px]">
-            <SelectValue placeholder="Status" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">All Status</SelectItem>
-            <SelectItem value="pending">Pending</SelectItem>
-            <SelectItem value="approved">Approved</SelectItem>
-            <SelectItem value="rejected">Rejected</SelectItem>
-          </SelectContent>
-        </Select>
-      </div>
+          <FormField
+            control={searchForm.control}
+            name="status"
+            render={({ field }) => (
+              <FormItem>
+                <Select value={field.value} onValueChange={field.onChange}>
+                  <FormControl>
+                    <SelectTrigger className="w-[180px]">
+                      <SelectValue placeholder="Status" />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    <SelectItem value="all">All Status</SelectItem>
+                    <SelectItem value="pending">Pending</SelectItem>
+                    <SelectItem value="approved">Approved</SelectItem>
+                    <SelectItem value="rejected">Rejected</SelectItem>
+                  </SelectContent>
+                </Select>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        </form>
+      </Form>
 
       <div className="rounded-md border">
         <Table>
@@ -201,10 +243,10 @@ export default function CasesTable({ initialCases }: CasesTableProps) {
                 </TableCell>
               </TableRow>
             ) : (
-              cases.map((caseItem) => (
-                <TableRow key={caseItem.id}>
-                  <TableCell>{caseItem.id}</TableCell>
-                  <TableCell>{caseItem.clientName}</TableCell>
+              cases.map((caseItem, index) => (
+                <TableRow key={caseItem.id} className={index % 2 === 0 ? "bg-gray-100" : "bg-white"}>
+                  <TableCell className="font-mono">{caseItem.id}</TableCell>
+                  <TableCell>{caseItem.clientName || "N/A"}</TableCell>
                   <TableCell>{caseItem.title}</TableCell>
                   <TableCell>{formatDate(caseItem.updatedAt)}</TableCell>
                   <TableCell>{getStatusBadge(caseItem.status)}</TableCell>
@@ -234,20 +276,25 @@ export default function CasesTable({ initialCases }: CasesTableProps) {
                             onClick={() => handleStatusUpdate(caseItem.id, "approved")}
                             className="text-green-600"
                             title="Approve Case"
+                            disabled={updatingCases.has(caseItem.id)}
                           >
-                            <svg
-                              xmlns="http://www.w3.org/2000/svg"
-                              width="16"
-                              height="16"
-                              viewBox="0 0 24 24"
-                              fill="none"
-                              stroke="currentColor"
-                              strokeWidth="2"
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                            >
-                              <path d="M20 6 9 17l-5-5" />
-                            </svg>
+                            {updatingCases.has(caseItem.id) ? (
+                              <Loader2 className="h-4 w-4 animate-spin" />
+                            ) : (
+                              <svg
+                                xmlns="http://www.w3.org/2000/svg"
+                                width="16"
+                                height="16"
+                                viewBox="0 0 24 24"
+                                fill="none"
+                                stroke="currentColor"
+                                strokeWidth="2"
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                              >
+                                <path d="M20 6 9 17l-5-5" />
+                              </svg>
+                            )}
                           </Button>
                           <Button
                             variant="ghost"
@@ -255,21 +302,26 @@ export default function CasesTable({ initialCases }: CasesTableProps) {
                             onClick={() => handleStatusUpdate(caseItem.id, "rejected")}
                             className="text-red-600"
                             title="Reject Case"
+                            disabled={updatingCases.has(caseItem.id)}
                           >
-                            <svg
-                              xmlns="http://www.w3.org/2000/svg"
-                              width="16"
-                              height="16"
-                              viewBox="0 0 24 24"
-                              fill="none"
-                              stroke="currentColor"
-                              strokeWidth="2"
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                            >
-                              <path d="M18 6 6 18" />
-                              <path d="m6 6 12 12" />
-                            </svg>
+                            {updatingCases.has(caseItem.id) ? (
+                              <Loader2 className="h-4 w-4 animate-spin" />
+                            ) : (
+                              <svg
+                                xmlns="http://www.w3.org/2000/svg"
+                                width="16"
+                                height="16"
+                                viewBox="0 0 24 24"
+                                fill="none"
+                                stroke="currentColor"
+                                strokeWidth="2"
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                              >
+                                <path d="M18 6 6 18" />
+                                <path d="m6 6 12 12" />
+                              </svg>
+                            )}
                           </Button>
                         </>
                       )}

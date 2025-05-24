@@ -71,8 +71,8 @@ const blogPosts = [
 export default function BlogList() {
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-      {blogPosts.map((post) => (
-        <Card key={post.id} className="overflow-hidden">
+      {blogPosts.map((post, index) => (
+        <Card key={post.id} className={`overflow-hidden ${index % 2 === 0 ? "bg-gray-100" : "bg-white"}`}>
           <div className="relative h-48 w-full">
             <Image src={post.image || "/placeholder.svg"} alt={post.title} fill className="object-cover" />
           </div>

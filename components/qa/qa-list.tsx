@@ -93,9 +93,13 @@ const questions = [
 export default function QAList() {
   return (
     <Accordion type="single" collapsible className="space-y-4">
-      {questions.map((item) => (
-        <AccordionItem key={item.id} value={`item-${item.id}`} className="border rounded-lg overflow-hidden">
-          <div className="flex items-center justify-between p-4 bg-white">
+      {questions.map((item, index) => (
+        <AccordionItem
+          key={item.id}
+          value={`item-${item.id}`}
+          className={`border rounded-lg overflow-hidden ${index % 2 === 0 ? "bg-gray-100" : "bg-white"}`}
+        >
+          <div className="flex items-center justify-between p-4">
             <div className="flex-1">
               <div className="flex items-center gap-2 mb-1">
                 <Badge variant={item.status === "answered" ? "default" : "outline"}>
@@ -140,7 +144,7 @@ export default function QAList() {
               </DropdownMenu>
             </div>
           </div>
-          <AccordionContent className="px-4 pb-4 pt-0 bg-white">
+          <AccordionContent className="px-4 pb-4 pt-0">
             {item.status === "answered" ? (
               <div className="mt-2 text-gray-700">{item.answer}</div>
             ) : (

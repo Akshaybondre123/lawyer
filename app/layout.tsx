@@ -1,9 +1,18 @@
-import type { Metadata } from 'next'
-import './globals.css'
-import { ChatButton } from "@/components/chat/chat-button"
+import type React from "react"
+import type { Metadata } from "next"
+import { Lato } from "next/font/google"
+import "./globals.css"
+
+// Initialize the Lato font
+const lato = Lato({
+  subsets: ["latin"],
+  weight: ["100", "300", "400", "700", "900"],
+  variable: "--font-lato",
+  display: "swap",
+})
 
 export const metadata: Metadata = {
-  // You can fill in the title and description as needed
+  
 }
 
 export default function RootLayout({
@@ -13,10 +22,10 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body>
-        {children}
-        <ChatButton />
-      </body>
+      <head>
+        <link rel="icon" href="/favicon.ico" sizes="any" />
+      </head>
+      <body className={`${lato.variable} font-lato`}>{children}</body>
     </html>
   )
 }

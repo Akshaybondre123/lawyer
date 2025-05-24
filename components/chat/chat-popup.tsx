@@ -1,11 +1,13 @@
 "use client"
 
-import type React from "react"
-
 import { useState, useEffect, useRef } from "react"
-import { X, Smile, Paperclip, Send, FileText } from "lucide-react"
+import { useForm } from "react-hook-form"
+import { zodResolver } from "@hookform/resolvers/zod"
+import { z } from "zod"
+import { X, Smile, Paperclip, Send, FileText, Loader2 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
+import { Form, FormControl, FormField, FormItem, FormMessage } from "@/components/ui/form"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { ChatMessage } from "@/components/chat/chat-message"
 import { getClientById } from "@/lib/api/clients-api"
@@ -18,6 +20,19 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Progress } from "@/components/ui/progress"
 import { ChatSummary } from "@/components/chat/chat-summary"
 
+const messageFormSchema = z.object({
+  content: z.string().min(1, "Message cannot be empty").max(1000, "Message too long"),
+})
+
+type MessageFormData = z.infer<typeof messageFormSchema>
+
+const sessionActionSchema = z.object({
+  action: z.enum(["end", "summary"]),
+  clientId: z.string(),
+})
+
+type SessionActionData = z.infer<typeof sessionActionSchema>
+
 interface ChatPopupProps {
   onClose: () => void
   clientId: string | null
@@ -25,10 +40,8 @@ interface ChatPopupProps {
 
 export function ChatPopup({ onClose, clientId }: ChatPopupProps) {
   const [messages, setMessages] = useState<Message[]>([])
-  const [newMessage, setNewMessage] = useState("")
   const [client, setClient] = useState<Client | null>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const [isSending, setIsSending] = useState(false)
   const [isEndingSession, setIsEndingSession] = useState(false)
   const [activeTab, setActiveTab] = useState<string>("chat")
   const [tokenCount, setTokenCount] = useState(0)
@@ -37,10 +50,20 @@ export function ChatPopup({ onClose, clientId }: ChatPopupProps) {
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const { toast } = useToast()
 
+  // Message form
+  const messageForm = useForm<MessageFormData>({
+    resolver: zodResolver(messageFormSchema),
+    defaultValues: {
+      content: "",
+    },
+  })
+
+  const watchedContent = messageForm.watch("content")
+
   // Calculate tokens for the current message (approximately 4 chars = 1 token)
   useEffect(() => {
-    setTokenCount(Math.ceil(newMessage.length / 4))
-  }, [newMessage])
+    setTokenCount(Math.ceil(watchedContent.length / 4))
+  }, [watchedContent])
 
   // Load client and messages
   useEffect(() => {
@@ -96,7 +119,7 @@ export function ChatPopup({ onClose, clientId }: ChatPopupProps) {
 
           // Calculate total tokens used in this session
           const totalTokens =
-            messageData.length > 0 ? messageData.reduce((sum, msg) => sum + (msg.tokenCount || 0), 0) : 15 // Default token count for welcome message
+            messageData.length > 0 ? messageData.reduce((sum, msg) => sum + (msg.tokenCount || 0), 0) : 15
           setSessionTokens(totalTokens)
         }
       } catch (error) {
@@ -119,10 +142,8 @@ export function ChatPopup({ onClose, clientId }: ChatPopupProps) {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" })
   }, [messages])
 
-  const handleSendMessage = async (e: React.FormEvent) => {
-    e.preventDefault()
-
-    if (!newMessage.trim() || !client) return
+  const onMessageSubmit = async (data: MessageFormData) => {
+    if (!client) return
 
     // Check if sending this message would exceed the token limit
     if (sessionTokens + tokenCount > maxTokens) {
@@ -134,11 +155,10 @@ export function ChatPopup({ onClose, clientId }: ChatPopupProps) {
       return
     }
 
-    setIsSending(true)
     try {
       const message: Message = {
         id: `msg_${Date.now()}`,
-        content: newMessage,
+        content: data.content,
         senderId: "current_user",
         receiverId: client.id,
         timestamp: new Date().toISOString(),
@@ -149,7 +169,7 @@ export function ChatPopup({ onClose, clientId }: ChatPopupProps) {
 
       // Add message to UI immediately
       setMessages((prev) => [...prev, message])
-      setNewMessage("")
+      messageForm.reset()
 
       // Update session token count
       setSessionTokens((prev) => prev + tokenCount)
@@ -175,6 +195,11 @@ export function ChatPopup({ onClose, clientId }: ChatPopupProps) {
           setSessionTokens((prev) => prev + aiResponseTokens)
         }, 1000)
       }
+
+      toast({
+        title: "Message sent",
+        description: "Your message has been sent successfully",
+      })
     } catch (error) {
       console.error("Error sending message:", error)
       toast({
@@ -182,36 +207,42 @@ export function ChatPopup({ onClose, clientId }: ChatPopupProps) {
         description: "Failed to send message",
         variant: "destructive",
       })
-    } finally {
-      setIsSending(false)
     }
   }
 
-  const handleEndSession = async () => {
-    if (!client) return
-
-    setIsEndingSession(true)
-    try {
-      await endChatSession(client.id)
-      toast({
-        title: "Session ended",
-        description: "Chat session has been ended successfully.",
-      })
-      onClose()
-    } catch (error) {
-      console.error("Error ending session:", error)
-      toast({
-        title: "Error",
-        description: "Failed to end session",
-        variant: "destructive",
-      })
-    } finally {
-      setIsEndingSession(false)
+  const handleSessionAction = async (actionData: SessionActionData) => {
+    if (actionData.action === "end") {
+      setIsEndingSession(true)
+      try {
+        await endChatSession(actionData.clientId)
+        toast({
+          title: "Session ended",
+          description: "Chat session has been ended successfully.",
+        })
+        onClose()
+      } catch (error) {
+        console.error("Error ending session:", error)
+        toast({
+          title: "Error",
+          description: "Failed to end session",
+          variant: "destructive",
+        })
+      } finally {
+        setIsEndingSession(false)
+      }
+    } else if (actionData.action === "summary") {
+      setActiveTab("summary")
     }
+  }
+
+  const handleEndSession = () => {
+    if (!client) return
+    handleSessionAction({ action: "end", clientId: client.id })
   }
 
   const handleViewSummary = () => {
-    setActiveTab("summary")
+    if (!client) return
+    handleSessionAction({ action: "summary", clientId: client.id })
   }
 
   return (
@@ -269,7 +300,7 @@ export function ChatPopup({ onClose, clientId }: ChatPopupProps) {
           <div className="flex-1 overflow-y-auto p-3 space-y-3 bg-gray-50">
             {isLoading ? (
               <div className="flex justify-center items-center h-full">
-                <span className="text-sm text-gray-500">Loading messages...</span>
+                <Loader2 className="h-6 w-6 animate-spin text-gray-500" />
               </div>
             ) : messages.length === 0 ? (
               <div className="flex justify-center items-center h-full">
@@ -292,45 +323,61 @@ export function ChatPopup({ onClose, clientId }: ChatPopupProps) {
           <div className="p-3 border-t space-y-2">
             <div className="flex justify-between items-center text-xs text-gray-500">
               <span>Current message: ~{tokenCount} tokens</span>
-              <span>{newMessage.length} characters</span>
+              <span>{watchedContent.length} characters</span>
             </div>
 
-            <form onSubmit={handleSendMessage} className="flex items-center gap-2">
-              <Button
-                type="button"
-                variant="ghost"
-                size="icon"
-                className="text-gray-500 hover:text-gray-700"
-                aria-label="Add attachment"
-              >
-                <Paperclip className="h-5 w-5" />
-              </Button>
-              <Input
-                value={newMessage}
-                onChange={(e) => setNewMessage(e.target.value)}
-                placeholder="Enter text"
-                className="flex-1"
-                disabled={isSending}
-              />
-              <Button
-                type="button"
-                variant="ghost"
-                size="icon"
-                className="text-gray-500 hover:text-gray-700"
-                aria-label="Add emoji"
-              >
-                <Smile className="h-5 w-5" />
-              </Button>
-              <Button
-                type="submit"
-                size="icon"
-                className="bg-[#0f0921] hover:bg-[#0f0921]/90 text-white rounded-full"
-                disabled={!newMessage.trim() || isSending}
-                aria-label="Send message"
-              >
-                <Send className="h-4 w-4" />
-              </Button>
-            </form>
+            <Form {...messageForm}>
+              <form onSubmit={messageForm.handleSubmit(onMessageSubmit)} className="flex items-center gap-2">
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="icon"
+                  className="text-gray-500 hover:text-gray-700"
+                  aria-label="Add attachment"
+                >
+                  <Paperclip className="h-5 w-5" />
+                </Button>
+                <FormField
+                  control={messageForm.control}
+                  name="content"
+                  render={({ field }) => (
+                    <FormItem className="flex-1">
+                      <FormControl>
+                        <Input
+                          placeholder="Enter text"
+                          {...field}
+                          disabled={messageForm.formState.isSubmitting}
+                          className="bg-[#F5F5F5] border-gray-200"
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="icon"
+                  className="text-gray-500 hover:text-gray-700"
+                  aria-label="Add emoji"
+                >
+                  <Smile className="h-5 w-5" />
+                </Button>
+                <Button
+                  type="submit"
+                  size="icon"
+                  className="bg-[#0f0921] hover:bg-[#0f0921]/90 text-white rounded-full"
+                  disabled={!watchedContent.trim() || messageForm.formState.isSubmitting}
+                  aria-label="Send message"
+                >
+                  {messageForm.formState.isSubmitting ? (
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                  ) : (
+                    <Send className="h-4 w-4" />
+                  )}
+                </Button>
+              </form>
+            </Form>
 
             <div className="flex gap-2 mt-2">
               <Button variant="outline" size="sm" className="flex-1" onClick={handleViewSummary}>
@@ -344,7 +391,14 @@ export function ChatPopup({ onClose, clientId }: ChatPopupProps) {
                 onClick={handleEndSession}
                 disabled={isEndingSession}
               >
-                {isEndingSession ? "Ending..." : "End Session"}
+                {isEndingSession ? (
+                  <>
+                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                    Ending...
+                  </>
+                ) : (
+                  "End Session"
+                )}
               </Button>
             </div>
           </div>

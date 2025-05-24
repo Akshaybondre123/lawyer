@@ -96,8 +96,8 @@ export default function ClientCases({ clientId }: ClientCasesProps) {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {cases.map((caseItem) => (
-                <TableRow key={caseItem.id}>
+              {cases.map((caseItem, index) => (
+                <TableRow key={caseItem.id} className={index % 2 === 0 ? "bg-gray-100" : "bg-white"}>
                   <TableCell>{caseItem.id}</TableCell>
                   <TableCell>{caseItem.title}</TableCell>
                   <TableCell>{getStatusBadge(caseItem.status)}</TableCell>

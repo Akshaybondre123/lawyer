@@ -376,13 +376,13 @@ export default function VoiceSummaryContent({ initialRecordings }: VoiceSummaryC
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
       {/* Left side - Recording UI */}
-      <Card className="p-6 flex flex-col items-center justify-center">
-        <div className="text-center mb-6">
+      <Card className="p-4 flex flex-col items-center justify-center">
+        <div className="text-center mb-4">
           <h2 className="text-xl font-semibold mb-2">The quick way to escape from reading text</h2>
           <p className="text-gray-500">Record your voice and get an instant summary</p>
         </div>
 
-        <div className="relative mb-6">
+        <div className="relative mb-4 -mt-2">
           <div
             className={`w-40 h-40 rounded-full flex items-center justify-center border-4 ${
               isRecording ? "border-red-500 animate-pulse" : "border-gray-200"

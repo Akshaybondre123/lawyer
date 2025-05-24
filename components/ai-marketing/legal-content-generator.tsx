@@ -1,43 +1,63 @@
 "use client"
 
 import { useState } from "react"
+import { useForm } from "react-hook-form"
+import { zodResolver } from "@hookform/resolvers/zod"
+import { z } from "zod"
 import { Card, CardContent } from "@/components/ui/card"
 import { Textarea } from "@/components/ui/textarea"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form"
 import { useToast } from "@/hooks/use-toast"
 import { Wand2, Send, Edit, Copy, Loader2 } from "lucide-react"
 import PostPreview from "@/components/ai-marketing/post-preview"
 import { generateLegalContent, publishPost, saveAsDraft } from "@/lib/api/marketing-api"
 import type { LegalPost, PostPlatform } from "@/types/marketing"
 
+const contentGenerationSchema = z.object({
+  prompt: z.string().min(10, "Prompt must be at least 10 characters").max(500, "Prompt too long"),
+  contentType: z.enum(["social", "blog", "newsletter"]),
+})
+
+type ContentGenerationData = z.infer<typeof contentGenerationSchema>
+
+const publishFormSchema = z.object({
+  targetRegion: z.string().min(2, "Target region is required"),
+  platforms: z.array(z.enum(["linkedin", "twitter", "facebook"])).min(1, "Select at least one platform"),
+})
+
+type PublishFormData = z.infer<typeof publishFormSchema>
+
 export default function LegalContentGenerator() {
-  const [prompt, setPrompt] = useState("")
-  const [contentType, setContentType] = useState<string>("social")
-  const [isGenerating, setIsGenerating] = useState(false)
-  const [isPublishing, setIsPublishing] = useState(false)
   const [generatedPost, setGeneratedPost] = useState<LegalPost | null>(null)
-  const [targetRegion, setTargetRegion] = useState("")
   const [showApprovalForm, setShowApprovalForm] = useState(false)
   const { toast } = useToast()
 
-  const handleGenerateContent = async () => {
-    if (!prompt.trim()) {
-      toast({
-        title: "Empty prompt",
-        description: "Please enter a prompt to generate content",
-        variant: "destructive",
-      })
-      return
-    }
+  // Content generation form
+  const contentForm = useForm<ContentGenerationData>({
+    resolver: zodResolver(contentGenerationSchema),
+    defaultValues: {
+      prompt: "",
+      contentType: "social",
+    },
+  })
 
-    setIsGenerating(true)
+  // Publishing form
+  const publishForm = useForm<PublishFormData>({
+    resolver: zodResolver(publishFormSchema),
+    defaultValues: {
+      targetRegion: "",
+      platforms: ["linkedin"],
+    },
+  })
+
+  const onContentSubmit = async (data: ContentGenerationData) => {
     try {
       const post = await generateLegalContent({
-        prompt,
-        contentType,
+        prompt: data.prompt,
+        contentType: data.contentType,
       })
 
       setGeneratedPost(post)
@@ -53,33 +73,17 @@ export default function LegalContentGenerator() {
         description: "There was an error generating your content",
         variant: "destructive",
       })
-    } finally {
-      setIsGenerating(false)
     }
   }
 
-  const handleApproveForPublishing = () => {
-    setShowApprovalForm(true)
-  }
-
-  const handlePublishPost = async () => {
+  const onPublishSubmit = async (data: PublishFormData) => {
     if (!generatedPost) return
 
-    if (!targetRegion.trim()) {
-      toast({
-        title: "Missing information",
-        description: "Please enter a target region/jurisdiction",
-        variant: "destructive",
-      })
-      return
-    }
-
-    setIsPublishing(true)
     try {
       await publishPost({
         postId: generatedPost.id,
-        targetRegion,
-        platforms: ["linkedin", "twitter", "facebook"] as PostPlatform[],
+        targetRegion: data.targetRegion,
+        platforms: data.platforms as PostPlatform[],
       })
 
       toast({
@@ -87,10 +91,10 @@ export default function LegalContentGenerator() {
         description: "Your content has been published to social media",
       })
 
-      // Reset the form
+      // Reset the forms
       setGeneratedPost(null)
-      setPrompt("")
-      setTargetRegion("")
+      contentForm.reset()
+      publishForm.reset()
       setShowApprovalForm(false)
     } catch (error) {
       toast({
@@ -98,9 +102,11 @@ export default function LegalContentGenerator() {
         description: "There was an error publishing your content",
         variant: "destructive",
       })
-    } finally {
-      setIsPublishing(false)
     }
+  }
+
+  const handleApproveForPublishing = () => {
+    setShowApprovalForm(true)
   }
 
   const handleSaveAsDraft = async () => {
@@ -144,46 +150,64 @@ export default function LegalContentGenerator() {
     <div className="space-y-6">
       <Card>
         <CardContent className="p-6">
-          <div className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="content-type">Content Type</Label>
-              <Select value={contentType} onValueChange={setContentType}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Select content type" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="social">Social Media Post</SelectItem>
-                  <SelectItem value="blog">Blog Post</SelectItem>
-                  <SelectItem value="newsletter">Newsletter</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="prompt">Prompt</Label>
-              <Textarea
-                id="prompt"
-                placeholder="Enter your prompt (e.g., 'Write a post about recent changes to family law in California')"
-                value={prompt}
-                onChange={(e) => setPrompt(e.target.value)}
-                className="min-h-[120px]"
+          <Form {...contentForm}>
+            <form onSubmit={contentForm.handleSubmit(onContentSubmit)} className="space-y-4">
+              <FormField
+                control={contentForm.control}
+                name="contentType"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Content Type</FormLabel>
+                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select content type" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        <SelectItem value="social">Social Media Post</SelectItem>
+                        <SelectItem value="blog">Blog Post</SelectItem>
+                        <SelectItem value="newsletter">Newsletter</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
               />
-            </div>
 
-            <Button onClick={handleGenerateContent} disabled={!prompt.trim() || isGenerating} className="w-full">
-              {isGenerating ? (
-                <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Generating...
-                </>
-              ) : (
-                <>
-                  <Wand2 className="mr-2 h-4 w-4" />
-                  Generate Content
-                </>
-              )}
-            </Button>
-          </div>
+              <FormField
+                control={contentForm.control}
+                name="prompt"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Prompt</FormLabel>
+                    <FormControl>
+                      <Textarea
+                        placeholder="Enter your prompt (e.g., 'Write a post about recent changes to family law in California')"
+                        className="min-h-[120px]"
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <Button type="submit" disabled={contentForm.formState.isSubmitting} className="w-full">
+                {contentForm.formState.isSubmitting ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Generating...
+                  </>
+                ) : (
+                  <>
+                    <Wand2 className="mr-2 h-4 w-4" />
+                    Generate Content
+                  </>
+                )}
+              </Button>
+            </form>
+          </Form>
         </CardContent>
       </Card>
 
@@ -196,37 +220,78 @@ export default function LegalContentGenerator() {
               <PostPreview post={generatedPost} />
 
               {showApprovalForm ? (
-                <div className="space-y-4 border rounded-md p-4 bg-muted/30">
-                  <div className="space-y-2">
-                    <Label htmlFor="target-region">Target Region/Jurisdiction</Label>
-                    <Input
-                      id="target-region"
-                      placeholder="Enter target region or jurisdiction (e.g., 'California', 'New York')"
-                      value={targetRegion}
-                      onChange={(e) => setTargetRegion(e.target.value)}
-                    />
-                  </div>
-
-                  <div className="flex flex-wrap gap-2">
-                    <Button onClick={handlePublishPost} disabled={isPublishing || !targetRegion.trim()}>
-                      {isPublishing ? (
-                        <>
-                          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                          Publishing...
-                        </>
-                      ) : (
-                        <>
-                          <Send className="mr-2 h-4 w-4" />
-                          Publish Now
-                        </>
+                <Form {...publishForm}>
+                  <form
+                    onSubmit={publishForm.handleSubmit(onPublishSubmit)}
+                    className="space-y-4 border rounded-md p-4 bg-muted/30"
+                  >
+                    <FormField
+                      control={publishForm.control}
+                      name="targetRegion"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Target Region/Jurisdiction</FormLabel>
+                          <FormControl>
+                            <Input
+                              placeholder="Enter target region or jurisdiction (e.g., 'California', 'New York')"
+                              {...field}
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
                       )}
-                    </Button>
+                    />
 
-                    <Button variant="outline" onClick={() => setShowApprovalForm(false)}>
-                      Back to Edit
-                    </Button>
-                  </div>
-                </div>
+                    <FormField
+                      control={publishForm.control}
+                      name="platforms"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Publishing Platforms</FormLabel>
+                          <div className="flex flex-wrap gap-2">
+                            {["linkedin", "twitter", "facebook"].map((platform) => (
+                              <label key={platform} className="flex items-center space-x-2">
+                                <input
+                                  type="checkbox"
+                                  checked={field.value.includes(platform as PostPlatform)}
+                                  onChange={(e) => {
+                                    if (e.target.checked) {
+                                      field.onChange([...field.value, platform])
+                                    } else {
+                                      field.onChange(field.value.filter((p) => p !== platform))
+                                    }
+                                  }}
+                                />
+                                <span className="capitalize">{platform}</span>
+                              </label>
+                            ))}
+                          </div>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+
+                    <div className="flex flex-wrap gap-2">
+                      <Button type="submit" disabled={publishForm.formState.isSubmitting}>
+                        {publishForm.formState.isSubmitting ? (
+                          <>
+                            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                            Publishing...
+                          </>
+                        ) : (
+                          <>
+                            <Send className="mr-2 h-4 w-4" />
+                            Publish Now
+                          </>
+                        )}
+                      </Button>
+
+                      <Button type="button" variant="outline" onClick={() => setShowApprovalForm(false)}>
+                        Back to Edit
+                      </Button>
+                    </div>
+                  </form>
+                </Form>
               ) : (
                 <div className="flex flex-wrap gap-2">
                   <Button onClick={handleApproveForPublishing}>

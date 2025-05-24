@@ -1,10 +1,15 @@
 "use client"
 
 import { useState } from "react"
+import { useForm } from "react-hook-form"
+import { zodResolver } from "@hookform/resolvers/zod"
+import { z } from "zod"
+import { Search, Video, FileText, Download, ExternalLink } from "lucide-react"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import { Form, FormControl, FormField, FormItem } from "@/components/ui/form"
 import { Badge } from "@/components/ui/badge"
-import { Video, FileText, Download, ExternalLink } from "lucide-react"
 import { formatDate } from "@/lib/utils"
 import { useToast } from "@/hooks/use-toast"
 import {
@@ -16,6 +21,12 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+
+const searchFormSchema = z.object({
+  query: z.string(),
+})
+
+type SearchFormData = z.infer<typeof searchFormSchema>
 
 interface VideoConsultation {
   id: string
@@ -32,9 +43,31 @@ interface VideoConsultationTableProps {
 }
 
 export default function VideoConsultationTable({ initialConsultations }: VideoConsultationTableProps) {
-  const [consultations] = useState<VideoConsultation[]>(initialConsultations)
+  const [consultations, setConsultations] = useState<VideoConsultation[]>(initialConsultations)
+  const [filteredConsultations, setFilteredConsultations] = useState<VideoConsultation[]>(initialConsultations)
   const [selectedConsultation, setSelectedConsultation] = useState<VideoConsultation | null>(null)
   const { toast } = useToast()
+
+  const searchForm = useForm<SearchFormData>({
+    resolver: zodResolver(searchFormSchema),
+    defaultValues: {
+      query: "",
+    },
+  })
+
+  const watchedQuery = searchForm.watch("query")
+
+  // Filter consultations based on search query
+  useState(() => {
+    if (!watchedQuery.trim()) {
+      setFilteredConsultations(consultations)
+    } else {
+      const filtered = consultations.filter((consultation) =>
+        consultation.clientName.toLowerCase().includes(watchedQuery.toLowerCase()),
+      )
+      setFilteredConsultations(filtered)
+    }
+  }, [watchedQuery, consultations])
 
   const getStatusBadge = (status: string) => {
     switch (status) {
@@ -117,7 +150,32 @@ export default function VideoConsultationTable({ initialConsultations }: VideoCo
   }
 
   return (
-    <>
+    <div className="space-y-4">
+      {/* Search Bar */}
+      <div className="relative">
+        <Form {...searchForm}>
+          <FormField
+            control={searchForm.control}
+            name="query"
+            render={({ field }) => (
+              <FormItem>
+                <FormControl>
+                  <div className="relative">
+                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-500" />
+                    <Input
+                      placeholder="Search consultations..."
+                      {...field}
+                      className="bg-[#F5F5F5] border-gray-200 pl-10"
+                    />
+                  </div>
+                </FormControl>
+              </FormItem>
+            )}
+          />
+        </Form>
+      </div>
+
+      {/* Consultations Table */}
       <div className="rounded-md border">
         <Table>
           <TableHeader>
@@ -130,128 +188,136 @@ export default function VideoConsultationTable({ initialConsultations }: VideoCo
             </TableRow>
           </TableHeader>
           <TableBody>
-            {consultations.map((consultation) => (
-              <TableRow key={consultation.id}>
-                <TableCell>{consultation.clientName}</TableCell>
-                <TableCell>{formatDate(consultation.scheduledTime, true)}</TableCell>
-                <TableCell>{getStatusBadge(consultation.status)}</TableCell>
-                <TableCell>{consultation.transcriptAccess}</TableCell>
-                <TableCell>
-                  <div className="flex gap-2">
-                    <Button
-                      size="sm"
-                      className="bg-green-600 hover:bg-green-700 text-white"
-                      onClick={() => handleStartCall(consultation)}
-                    >
-                      {consultation.videoLink ? (
-                        <>
-                          <ExternalLink className="h-4 w-4 mr-1" />
-                          Join Call
-                        </>
-                      ) : (
-                        <>
-                          <Video className="h-4 w-4 mr-1" />
-                          Start Call
-                        </>
-                      )}
-                    </Button>
-                    <Button size="sm" variant="outline" onClick={() => handleReschedule(consultation.id)}>
-                      Reschedule
-                    </Button>
-                    {consultation.hasTranscript ? (
-                      <Dialog>
-                        <DialogTrigger asChild>
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            className="text-blue-600 hover:text-blue-700 hover:bg-blue-50"
-                            onClick={() => handleViewTranscript(consultation)}
-                          >
-                            <FileText className="h-4 w-4 mr-1" />
-                            Transcript
-                          </Button>
-                        </DialogTrigger>
-                        <DialogContent className="sm:max-w-[625px]">
-                          <DialogHeader>
-                            <DialogTitle>Video Consultation Transcript</DialogTitle>
-                            <DialogDescription>
-                              Consultation with {consultation.clientName} on{" "}
-                              {formatDate(consultation.scheduledTime, true)}
-                            </DialogDescription>
-                          </DialogHeader>
-                          <Tabs defaultValue="original" className="mt-4">
-                            <TabsList className="grid w-full grid-cols-2">
-                              <TabsTrigger value="original">Original Transcript</TabsTrigger>
-                              <TabsTrigger value="summary">Summary</TabsTrigger>
-                            </TabsList>
-                            <TabsContent value="original" className="mt-4">
-                              <div className="border rounded-md p-4 h-[300px] overflow-y-auto bg-gray-50">
-                                <p className="text-sm">
-                                  <strong>Lawyer:</strong> Good morning, thank you for joining this consultation.
-                                </p>
-                                <p className="text-sm mt-2">
-                                  <strong>Client:</strong> Good morning, thank you for making the time.
-                                </p>
-                                <p className="text-sm mt-2">
-                                  <strong>Lawyer:</strong> Let's discuss the details of your case. Could you please
-                                  provide an overview of the situation?
-                                </p>
-                                <p className="text-sm mt-2">
-                                  <strong>Client:</strong> Of course. The issue began approximately three months ago
-                                  when...
-                                </p>
-                                {/* More transcript content would go here */}
-                              </div>
-                              <div className="flex justify-end mt-4">
-                                <Button onClick={() => handleDownloadTranscript("original")}>
-                                  <Download className="h-4 w-4 mr-1" />
-                                  Download Original
-                                </Button>
-                              </div>
-                            </TabsContent>
-                            <TabsContent value="summary" className="mt-4">
-                              <div className="border rounded-md p-4 h-[300px] overflow-y-auto bg-gray-50">
-                                <h3 className="font-medium mb-2">Consultation Summary</h3>
-                                <p className="text-sm mb-2">
-                                  This consultation covered the client's legal issue that began three months ago. The
-                                  main points discussed were:
-                                </p>
-                                <ul className="list-disc pl-5 space-y-1 text-sm">
-                                  <li>Background of the case and relevant timeline</li>
-                                  <li>Legal options available to the client</li>
-                                  <li>Potential outcomes and associated risks</li>
-                                  <li>Next steps and documentation requirements</li>
-                                </ul>
-                                <h3 className="font-medium mt-4 mb-2">Action Items</h3>
-                                <ol className="list-decimal pl-5 space-y-1 text-sm">
-                                  <li>Client to provide additional documentation by next week</li>
-                                  <li>Lawyer to draft initial response letter</li>
-                                  <li>Follow-up consultation scheduled for next month</li>
-                                </ol>
-                              </div>
-                              <div className="flex justify-end mt-4">
-                                <Button onClick={() => handleDownloadTranscript("summary")}>
-                                  <Download className="h-4 w-4 mr-1" />
-                                  Download Summary
-                                </Button>
-                              </div>
-                            </TabsContent>
-                          </Tabs>
-                        </DialogContent>
-                      </Dialog>
-                    ) : (
-                      <Button size="sm" variant="outline" onClick={() => handleGenerateTranscript(consultation.id)}>
-                        <FileText className="h-4 w-4 mr-1" />
-                        Generate Transcript
-                      </Button>
-                    )}
-                  </div>
+            {filteredConsultations.length === 0 ? (
+              <TableRow>
+                <TableCell colSpan={5} className="text-center py-8 text-gray-500">
+                  No consultations found
                 </TableCell>
               </TableRow>
-            ))}
+            ) : (
+              filteredConsultations.map((consultation, index) => (
+                <TableRow key={consultation.id} className={index % 2 === 0 ? "bg-gray-100" : ""}>
+                  <TableCell>{consultation.clientName}</TableCell>
+                  <TableCell>{formatDate(consultation.scheduledTime, true)}</TableCell>
+                  <TableCell>{getStatusBadge(consultation.status)}</TableCell>
+                  <TableCell>{consultation.transcriptAccess}</TableCell>
+                  <TableCell>
+                    <div className="flex gap-2">
+                      <Button
+                        size="sm"
+                        className="bg-green-600 hover:bg-green-700 text-white"
+                        onClick={() => handleStartCall(consultation)}
+                      >
+                        {consultation.videoLink ? (
+                          <>
+                            <ExternalLink className="h-4 w-4 mr-1" />
+                            Join Call
+                          </>
+                        ) : (
+                          <>
+                            <Video className="h-4 w-4 mr-1" />
+                            Start Call
+                          </>
+                        )}
+                      </Button>
+                      <Button size="sm" variant="outline" onClick={() => handleReschedule(consultation.id)}>
+                        Reschedule
+                      </Button>
+                      {consultation.hasTranscript ? (
+                        <Dialog>
+                          <DialogTrigger asChild>
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              className="text-blue-600 hover:text-blue-700 hover:bg-blue-50"
+                              onClick={() => handleViewTranscript(consultation)}
+                            >
+                              <FileText className="h-4 w-4 mr-1" />
+                              Transcript
+                            </Button>
+                          </DialogTrigger>
+                          <DialogContent className="sm:max-w-[625px]">
+                            <DialogHeader>
+                              <DialogTitle>Video Consultation Transcript</DialogTitle>
+                              <DialogDescription>
+                                Consultation with {consultation.clientName} on{" "}
+                                {formatDate(consultation.scheduledTime, true)}
+                              </DialogDescription>
+                            </DialogHeader>
+                            <Tabs defaultValue="original" className="mt-4">
+                              <TabsList className="grid w-full grid-cols-2">
+                                <TabsTrigger value="original">Original Transcript</TabsTrigger>
+                                <TabsTrigger value="summary">Summary</TabsTrigger>
+                              </TabsList>
+                              <TabsContent value="original" className="mt-4">
+                                <div className="border rounded-md p-4 h-[300px] overflow-y-auto bg-gray-50">
+                                  <p className="text-sm">
+                                    <strong>Lawyer:</strong> Good morning, thank you for joining this consultation.
+                                  </p>
+                                  <p className="text-sm mt-2">
+                                    <strong>Client:</strong> Good morning, thank you for making the time.
+                                  </p>
+                                  <p className="text-sm mt-2">
+                                    <strong>Lawyer:</strong> Let's discuss the details of your case. Could you please
+                                    provide an overview of the situation?
+                                  </p>
+                                  <p className="text-sm mt-2">
+                                    <strong>Client:</strong> Of course. The issue began approximately three months ago
+                                    when...
+                                  </p>
+                                  {/* More transcript content would go here */}
+                                </div>
+                                <div className="flex justify-end mt-4">
+                                  <Button onClick={() => handleDownloadTranscript("original")}>
+                                    <Download className="h-4 w-4 mr-1" />
+                                    Download Original
+                                  </Button>
+                                </div>
+                              </TabsContent>
+                              <TabsContent value="summary" className="mt-4">
+                                <div className="border rounded-md p-4 h-[300px] overflow-y-auto bg-gray-50">
+                                  <h3 className="font-medium mb-2">Consultation Summary</h3>
+                                  <p className="text-sm mb-2">
+                                    This consultation covered the client's legal issue that began three months ago. The
+                                    main points discussed were:
+                                  </p>
+                                  <ul className="list-disc pl-5 space-y-1 text-sm">
+                                    <li>Background of the case and relevant timeline</li>
+                                    <li>Legal options available to the client</li>
+                                    <li>Potential outcomes and associated risks</li>
+                                    <li>Next steps and documentation requirements</li>
+                                  </ul>
+                                  <h3 className="font-medium mt-4 mb-2">Action Items</h3>
+                                  <ol className="list-decimal pl-5 space-y-1 text-sm">
+                                    <li>Client to provide additional documentation by next week</li>
+                                    <li>Lawyer to draft initial response letter</li>
+                                    <li>Follow-up consultation scheduled for next month</li>
+                                  </ol>
+                                </div>
+                                <div className="flex justify-end mt-4">
+                                  <Button onClick={() => handleDownloadTranscript("summary")}>
+                                    <Download className="h-4 w-4 mr-1" />
+                                    Download Summary
+                                  </Button>
+                                </div>
+                              </TabsContent>
+                            </Tabs>
+                          </DialogContent>
+                        </Dialog>
+                      ) : (
+                        <Button size="sm" variant="outline" onClick={() => handleGenerateTranscript(consultation.id)}>
+                          <FileText className="h-4 w-4 mr-1" />
+                          Generate Transcript
+                        </Button>
+                      )}
+                    </div>
+                  </TableCell>
+                </TableRow>
+              ))
+            )}
           </TableBody>
         </Table>
       </div>
-    </>
+    </div>
   )
 }

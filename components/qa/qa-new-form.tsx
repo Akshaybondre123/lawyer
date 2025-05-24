@@ -1,133 +1,163 @@
 "use client"
 
-import { useState } from "react"
+import { useForm } from "react-hook-form"
+import { zodResolver } from "@hookform/resolvers/zod"
+import * as z from "zod"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
-import { Label } from "@/components/ui/label"
 import { Checkbox } from "@/components/ui/checkbox"
 import { useRouter } from "next/navigation"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Alert, AlertDescription } from "@/components/ui/alert"
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form"
+
+const qaSchema = z.object({
+  question: z.string().min(10, "Question must be at least 10 characters"),
+  clientName: z.string().optional(),
+  isAnonymous: z.boolean().default(true),
+  category: z.string().min(1, "Please select a category"),
+  tags: z.string().optional(),
+})
+
+type QAFormData = z.infer<typeof qaSchema>
 
 export default function QANewForm() {
   const router = useRouter()
-  const [formData, setFormData] = useState({
-    question: "",
-    clientName: "",
-    isAnonymous: true,
-    category: "general",
-    tags: "",
+
+  const form = useForm<QAFormData>({
+    resolver: zodResolver(qaSchema),
+    defaultValues: {
+      question: "",
+      clientName: "",
+      isAnonymous: true,
+      category: "general",
+      tags: "",
+    },
   })
-  const [isSubmitting, setIsSubmitting] = useState(false)
-  const [error, setError] = useState<string | null>(null)
 
-  const handleChange = (field: string, value: string | boolean) => {
-    setFormData((prev) => ({ ...prev, [field]: value }))
-  }
-
-  const handleSubmit = async () => {
-    if (!formData.question.trim()) {
-      setError("Question cannot be empty")
-      return
-    }
-
-    setIsSubmitting(true)
-    setError(null)
-
+  const onSubmit = async (data: QAFormData) => {
     try {
-      // In a real app, save to API
-      // For now, just simulate a delay
-      await new Promise((resolve) => setTimeout(resolve, 1000))
+      // Example API call structure for backend team
+      const response = await fetch("/api/qa", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(data),
+      })
 
-      // Navigate back to Q&A list after saving
-      router.push("/qa")
-    } catch (err) {
-      setError("Failed to save question")
-      console.error(err)
-    } finally {
-      setIsSubmitting(false)
+      if (response.ok) {
+        router.push("/qa")
+      }
+    } catch (error) {
+      console.error("Failed to save question:", error)
     }
   }
 
   return (
     <div className="space-y-6">
-      {error && (
-        <Alert variant="destructive">
-          <AlertDescription>{error}</AlertDescription>
-        </Alert>
-      )}
-
-      <div className="space-y-4">
-        <div className="space-y-2">
-          <Label htmlFor="question">Question</Label>
-          <Textarea
-            id="question"
-            value={formData.question}
-            onChange={(e) => handleChange("question", e.target.value)}
-            placeholder="Enter the legal question..."
-            className="min-h-[150px]"
+      <Form {...form}>
+        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+          <FormField
+            control={form.control}
+            name="question"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Question</FormLabel>
+                <FormControl>
+                  <Textarea placeholder="Enter the legal question..." className="min-h-[150px]" {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
           />
-        </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div className="space-y-2">
-            <Label htmlFor="clientName">Client Name</Label>
-            <Input
-              id="clientName"
-              value={formData.clientName}
-              onChange={(e) => handleChange("clientName", e.target.value)}
-              placeholder="Enter client name"
-              disabled={formData.isAnonymous}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <FormField
+              control={form.control}
+              name="clientName"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Client Name</FormLabel>
+                  <FormControl>
+                    <Input placeholder="Enter client name" disabled={form.watch("isAnonymous")} {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="category"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Category</FormLabel>
+                  <Select onValueChange={field.onChange} defaultValue={field.value}>
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select category" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      <SelectItem value="general">General</SelectItem>
+                      <SelectItem value="family-law">Family Law</SelectItem>
+                      <SelectItem value="criminal-law">Criminal Law</SelectItem>
+                      <SelectItem value="corporate-law">Corporate Law</SelectItem>
+                      <SelectItem value="real-estate">Real Estate</SelectItem>
+                      <SelectItem value="intellectual-property">Intellectual Property</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <FormMessage />
+                </FormItem>
+              )}
             />
           </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="category">Category</Label>
-            <Select value={formData.category} onValueChange={(value) => handleChange("category", value)}>
-              <SelectTrigger id="category">
-                <SelectValue placeholder="Select category" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="general">General</SelectItem>
-                <SelectItem value="family-law">Family Law</SelectItem>
-                <SelectItem value="criminal-law">Criminal Law</SelectItem>
-                <SelectItem value="corporate-law">Corporate Law</SelectItem>
-                <SelectItem value="real-estate">Real Estate</SelectItem>
-                <SelectItem value="intellectual-property">Intellectual Property</SelectItem>
-              </SelectContent>
-            </Select>
+          <FormField
+            control={form.control}
+            name="tags"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Tags (comma separated)</FormLabel>
+                <FormControl>
+                  <Input placeholder="e.g. divorce, custody, property" {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="isAnonymous"
+            render={({ field }) => (
+              <FormItem className="flex flex-row items-start space-x-3 space-y-0">
+                <FormControl>
+                  <Checkbox checked={field.value} onCheckedChange={field.onChange} />
+                </FormControl>
+                <div className="space-y-1 leading-none">
+                  <FormLabel>Submit as anonymous</FormLabel>
+                </div>
+              </FormItem>
+            )}
+          />
+
+          <div className="flex justify-end gap-2 pt-4">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => router.push("/qa")}
+              disabled={form.formState.isSubmitting}
+            >
+              Cancel
+            </Button>
+            <Button type="submit" disabled={form.formState.isSubmitting}>
+              {form.formState.isSubmitting ? "Submitting..." : "Submit Question"}
+            </Button>
           </div>
-        </div>
-
-        <div className="space-y-2">
-          <Label htmlFor="tags">Tags (comma separated)</Label>
-          <Input
-            id="tags"
-            value={formData.tags}
-            onChange={(e) => handleChange("tags", e.target.value)}
-            placeholder="e.g. divorce, custody, property"
-          />
-        </div>
-
-        <div className="flex items-center space-x-2">
-          <Checkbox
-            id="isAnonymous"
-            checked={formData.isAnonymous}
-            onCheckedChange={(checked) => handleChange("isAnonymous", checked === true)}
-          />
-          <Label htmlFor="isAnonymous">Submit as anonymous</Label>
-        </div>
-
-        <div className="flex justify-end gap-2 pt-4">
-          <Button variant="outline" onClick={() => router.push("/qa")} disabled={isSubmitting}>
-            Cancel
-          </Button>
-          <Button onClick={handleSubmit} disabled={isSubmitting}>
-            Submit Question
-          </Button>
-        </div>
-      </div>
+        </form>
+      </Form>
     </div>
   )
 }

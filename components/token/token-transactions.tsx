@@ -59,8 +59,8 @@ export default function TokenTransactions() {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {transactions.map((transaction) => (
-              <TableRow key={transaction.id}>
+            {transactions.map((transaction, index) => (
+              <TableRow key={transaction.id} className={index % 2 === 0 ? "bg-gray-100" : ""}>
                 <TableCell>{transaction.date}</TableCell>
                 <TableCell>{transaction.clientId}</TableCell>
                 <TableCell>{transaction.amount}</TableCell>

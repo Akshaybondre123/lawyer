@@ -4,11 +4,11 @@ import { useState } from "react"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { z } from "zod"
-import { Search, Video, FileText, Download, ExternalLink } from "lucide-react"
+import { Video, FileText, Download, ExternalLink } from "lucide-react"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { Form, FormControl, FormField, FormItem } from "@/components/ui/form"
+import { Form, FormControl, FormField, FormItem, FormMessage } from "@/components/ui/form"
 import { Badge } from "@/components/ui/badge"
 import { formatDate } from "@/lib/utils"
 import { useToast } from "@/hooks/use-toast"
@@ -152,23 +152,38 @@ export default function VideoConsultationTable({ initialConsultations }: VideoCo
   return (
     <div className="space-y-4">
       {/* Search Bar */}
-      <div className="relative">
+      <div className="flex w-full max-w-sm items-center space-x-2">
         <Form {...searchForm}>
           <FormField
             control={searchForm.control}
             name="query"
             render={({ field }) => (
-              <FormItem>
+              <FormItem className="flex-1 relative">
                 <FormControl>
                   <div className="relative">
-                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-500" />
                     <Input
                       placeholder="Search consultations..."
                       {...field}
                       className="bg-[#F5F5F5] border-gray-200 pl-10"
                     />
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      width="16"
+                      height="16"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400"
+                    >
+                      <circle cx="11" cy="11" r="8" />
+                      <path d="m21 21-4.3-4.3" />
+                    </svg>
                   </div>
                 </FormControl>
+                <FormMessage />
               </FormItem>
             )}
           />

@@ -69,8 +69,8 @@ export default function SubscriptionHistory() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {subscriptionHistory.map((item) => (
-                <TableRow key={item.id}>
+              {subscriptionHistory.map((item, index) => (
+                <TableRow key={item.id} className={index % 2 === 0 ? "bg-gray-100" : ""}>
                   <TableCell className="font-medium">{item.id}</TableCell>
                   <TableCell>{item.date}</TableCell>
                   <TableCell>{item.description}</TableCell>

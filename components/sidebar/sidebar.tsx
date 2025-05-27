@@ -88,6 +88,8 @@ export default function Sidebar() {
     { href: "/dashboard", icon: <LayoutDashboard size={18} />, label: "Dashboard" },
     { href: "/cases", icon: <FileText size={18} />, label: "Cases" },
     { href: "/client", icon: <Users size={18} />, label: "Client" },
+      { href: "/documents", icon: <FileText size={18} />, label: "Documents" },
+
     { href: "/ai-assistants", icon: <Bot size={18} />, label: "AI Assistants" },
     { href: "/chat", icon: <MessageSquare size={18} />, label: "Chat" },
     { href: "/video-consultations", icon: <Video size={18} />, label: "Video Consultations" },

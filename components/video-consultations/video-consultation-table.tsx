@@ -192,146 +192,176 @@ export default function VideoConsultationTable({ initialConsultations }: VideoCo
 
       {/* Consultations Table */}
       <div className="rounded-md border">
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>Client Name</TableHead>
-              <TableHead>Scheduled Time</TableHead>
-              <TableHead>Status</TableHead>
-              <TableHead>Transcript Access</TableHead>
-              <TableHead>Action</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {filteredConsultations.length === 0 ? (
-              <TableRow>
-                <TableCell colSpan={5} className="text-center py-8 text-gray-500">
-                  No consultations found
-                </TableCell>
-              </TableRow>
-            ) : (
-              filteredConsultations.map((consultation, index) => (
-                <TableRow key={consultation.id} className={index % 2 === 0 ? "bg-gray-100" : ""}>
-                  <TableCell>{consultation.clientName}</TableCell>
-                  <TableCell>{formatDate(consultation.scheduledTime, true)}</TableCell>
-                  <TableCell>{getStatusBadge(consultation.status)}</TableCell>
-                  <TableCell>{consultation.transcriptAccess}</TableCell>
-                  <TableCell>
-                    <div className="flex gap-2">
-                      <Button
-                        size="sm"
-                        className="bg-green-600 hover:bg-green-700 text-white"
-                        onClick={() => handleStartCall(consultation)}
-                      >
-                        {consultation.videoLink ? (
-                          <>
-                            <ExternalLink className="h-4 w-4 mr-1" />
-                            Join Call
-                          </>
-                        ) : (
-                          <>
-                            <Video className="h-4 w-4 mr-1" />
-                            Start Call
-                          </>
-                        )}
-                      </Button>
-                      <Button size="sm" variant="outline" onClick={() => handleReschedule(consultation.id)}>
-                        Reschedule
-                      </Button>
-                      {consultation.hasTranscript ? (
-                        <Dialog>
-                          <DialogTrigger asChild>
+        <div className="overflow-x-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100 hover:scrollbar-thumb-gray-400">
+          <div className="min-w-[1000px] relative">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead className="min-w-[120px]">Client Name</TableHead>
+                  <TableHead className="min-w-[150px]">Scheduled Time</TableHead>
+                  <TableHead className="min-w-[100px]">Status</TableHead>
+                  <TableHead className="min-w-[140px]">Transcript Access</TableHead>
+                  <TableHead className="min-w-[280px]">Action</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {filteredConsultations.length === 0 ? (
+                  <TableRow>
+                    <TableCell colSpan={5} className="text-center py-8 text-gray-500">
+                      No consultations found
+                    </TableCell>
+                  </TableRow>
+                ) : (
+                  filteredConsultations.map((consultation, index) => (
+                    <TableRow key={consultation.id} className={index % 2 === 0 ? "bg-gray-100" : ""}>
+                      <TableCell className="min-w-[120px]">{consultation.clientName}</TableCell>
+                      <TableCell className="min-w-[150px]">{formatDate(consultation.scheduledTime, true)}</TableCell>
+                      <TableCell className="min-w-[100px]">{getStatusBadge(consultation.status)}</TableCell>
+                      <TableCell className="min-w-[140px]">{consultation.transcriptAccess}</TableCell>
+                      <TableCell className="min-w-[280px]">
+                        <div className="flex gap-1 flex-wrap">
+                          <Button
+                            size="sm"
+                            className="bg-green-600 hover:bg-green-700 text-white text-xs px-2 py-1"
+                            onClick={() => handleStartCall(consultation)}
+                          >
+                            {consultation.videoLink ? (
+                              <>
+                                <ExternalLink className="h-3 w-3 mr-1" />
+                                Join
+                              </>
+                            ) : (
+                              <>
+                                <Video className="h-3 w-3 mr-1" />
+                                Start
+                              </>
+                            )}
+                          </Button>
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            className="text-xs px-2 py-1"
+                            onClick={() => handleReschedule(consultation.id)}
+                          >
+                            Reschedule
+                          </Button>
+                          {consultation.hasTranscript ? (
+                            <Dialog>
+                              <DialogTrigger asChild>
+                                <Button
+                                  size="sm"
+                                  variant="outline"
+                                  className="text-blue-600 hover:text-blue-700 hover:bg-blue-50 text-xs px-2 py-1"
+                                  onClick={() => handleViewTranscript(consultation)}
+                                >
+                                  <FileText className="h-3 w-3 mr-1" />
+                                  Transcript
+                                </Button>
+                              </DialogTrigger>
+                              <DialogContent className="sm:max-w-[625px]">
+                                <DialogHeader>
+                                  <DialogTitle>Video Consultation Transcript</DialogTitle>
+                                  <DialogDescription>
+                                    Consultation with {consultation.clientName} on{" "}
+                                    {formatDate(consultation.scheduledTime, true)}
+                                  </DialogDescription>
+                                </DialogHeader>
+                                <Tabs defaultValue="original" className="mt-4">
+                                  <TabsList className="grid w-full grid-cols-2">
+                                    <TabsTrigger value="original">Original Transcript</TabsTrigger>
+                                    <TabsTrigger value="summary">Summary</TabsTrigger>
+                                  </TabsList>
+                                  <TabsContent value="original" className="mt-4">
+                                    <div className="border rounded-md p-4 h-[300px] overflow-y-auto bg-gray-50">
+                                      <p className="text-sm">
+                                        <strong>Lawyer:</strong> Good morning, thank you for joining this consultation.
+                                      </p>
+                                      <p className="text-sm mt-2">
+                                        <strong>Client:</strong> Good morning, thank you for making the time.
+                                      </p>
+                                      <p className="text-sm mt-2">
+                                        <strong>Lawyer:</strong> Let's discuss the details of your case. Could you
+                                        please provide an overview of the situation?
+                                      </p>
+                                      <p className="text-sm mt-2">
+                                        <strong>Client:</strong> Of course. The issue began approximately three months
+                                        ago when...
+                                      </p>
+                                      {/* More transcript content would go here */}
+                                    </div>
+                                    <div className="flex justify-end mt-4">
+                                      <Button onClick={() => handleDownloadTranscript("original")}>
+                                        <Download className="h-4 w-4 mr-1" />
+                                        Download Original
+                                      </Button>
+                                    </div>
+                                  </TabsContent>
+                                  <TabsContent value="summary" className="mt-4">
+                                    <div className="border rounded-md p-4 h-[300px] overflow-y-auto bg-gray-50">
+                                      <h3 className="font-medium mb-2">Consultation Summary</h3>
+                                      <p className="text-sm mb-2">
+                                        This consultation covered the client's legal issue that began three months ago.
+                                        The main points discussed were:
+                                      </p>
+                                      <ul className="list-disc pl-5 space-y-1 text-sm">
+                                        <li>Background of the case and relevant timeline</li>
+                                        <li>Legal options available to the client</li>
+                                        <li>Potential outcomes and associated risks</li>
+                                        <li>Next steps and documentation requirements</li>
+                                      </ul>
+                                      <h3 className="font-medium mt-4 mb-2">Action Items</h3>
+                                      <ol className="list-decimal pl-5 space-y-1 text-sm">
+                                        <li>Client to provide additional documentation by next week</li>
+                                        <li>Lawyer to draft initial response letter</li>
+                                        <li>Follow-up consultation scheduled for next month</li>
+                                      </ol>
+                                    </div>
+                                    <div className="flex justify-end mt-4">
+                                      <Button onClick={() => handleDownloadTranscript("summary")}>
+                                        <Download className="h-4 w-4 mr-1" />
+                                        Download Summary
+                                      </Button>
+                                    </div>
+                                  </TabsContent>
+                                </Tabs>
+                              </DialogContent>
+                            </Dialog>
+                          ) : (
                             <Button
                               size="sm"
                               variant="outline"
-                              className="text-blue-600 hover:text-blue-700 hover:bg-blue-50"
-                              onClick={() => handleViewTranscript(consultation)}
+                              className="text-xs px-2 py-1"
+                              onClick={() => handleGenerateTranscript(consultation.id)}
                             >
-                              <FileText className="h-4 w-4 mr-1" />
-                              Transcript
+                              <FileText className="h-3 w-3 mr-1" />
+                              Generate
                             </Button>
-                          </DialogTrigger>
-                          <DialogContent className="sm:max-w-[625px]">
-                            <DialogHeader>
-                              <DialogTitle>Video Consultation Transcript</DialogTitle>
-                              <DialogDescription>
-                                Consultation with {consultation.clientName} on{" "}
-                                {formatDate(consultation.scheduledTime, true)}
-                              </DialogDescription>
-                            </DialogHeader>
-                            <Tabs defaultValue="original" className="mt-4">
-                              <TabsList className="grid w-full grid-cols-2">
-                                <TabsTrigger value="original">Original Transcript</TabsTrigger>
-                                <TabsTrigger value="summary">Summary</TabsTrigger>
-                              </TabsList>
-                              <TabsContent value="original" className="mt-4">
-                                <div className="border rounded-md p-4 h-[300px] overflow-y-auto bg-gray-50">
-                                  <p className="text-sm">
-                                    <strong>Lawyer:</strong> Good morning, thank you for joining this consultation.
-                                  </p>
-                                  <p className="text-sm mt-2">
-                                    <strong>Client:</strong> Good morning, thank you for making the time.
-                                  </p>
-                                  <p className="text-sm mt-2">
-                                    <strong>Lawyer:</strong> Let's discuss the details of your case. Could you please
-                                    provide an overview of the situation?
-                                  </p>
-                                  <p className="text-sm mt-2">
-                                    <strong>Client:</strong> Of course. The issue began approximately three months ago
-                                    when...
-                                  </p>
-                                  {/* More transcript content would go here */}
-                                </div>
-                                <div className="flex justify-end mt-4">
-                                  <Button onClick={() => handleDownloadTranscript("original")}>
-                                    <Download className="h-4 w-4 mr-1" />
-                                    Download Original
-                                  </Button>
-                                </div>
-                              </TabsContent>
-                              <TabsContent value="summary" className="mt-4">
-                                <div className="border rounded-md p-4 h-[300px] overflow-y-auto bg-gray-50">
-                                  <h3 className="font-medium mb-2">Consultation Summary</h3>
-                                  <p className="text-sm mb-2">
-                                    This consultation covered the client's legal issue that began three months ago. The
-                                    main points discussed were:
-                                  </p>
-                                  <ul className="list-disc pl-5 space-y-1 text-sm">
-                                    <li>Background of the case and relevant timeline</li>
-                                    <li>Legal options available to the client</li>
-                                    <li>Potential outcomes and associated risks</li>
-                                    <li>Next steps and documentation requirements</li>
-                                  </ul>
-                                  <h3 className="font-medium mt-4 mb-2">Action Items</h3>
-                                  <ol className="list-decimal pl-5 space-y-1 text-sm">
-                                    <li>Client to provide additional documentation by next week</li>
-                                    <li>Lawyer to draft initial response letter</li>
-                                    <li>Follow-up consultation scheduled for next month</li>
-                                  </ol>
-                                </div>
-                                <div className="flex justify-end mt-4">
-                                  <Button onClick={() => handleDownloadTranscript("summary")}>
-                                    <Download className="h-4 w-4 mr-1" />
-                                    Download Summary
-                                  </Button>
-                                </div>
-                              </TabsContent>
-                            </Tabs>
-                          </DialogContent>
-                        </Dialog>
-                      ) : (
-                        <Button size="sm" variant="outline" onClick={() => handleGenerateTranscript(consultation.id)}>
-                          <FileText className="h-4 w-4 mr-1" />
-                          Generate Transcript
-                        </Button>
-                      )}
-                    </div>
-                  </TableCell>
-                </TableRow>
-              ))
-            )}
-          </TableBody>
-        </Table>
+                          )}
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  ))
+                )}
+              </TableBody>
+            </Table>
+
+            {/* Scroll indicator for better UX */}
+            <div className="absolute top-0 right-0 h-full w-8 bg-gradient-to-l from-white to-transparent pointer-events-none opacity-50"></div>
+          </div>
+        </div>
+
+        {/* Scroll hint */}
+        <div className="text-xs text-gray-500 text-center py-2 border-t bg-gray-50">
+          <span className="inline-flex items-center gap-1">
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16l-4-4m0 0l4-4m-4 4h18" />
+            </svg>
+            Scroll horizontally to view all columns
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
+            </svg>
+          </span>
+        </div>
       </div>
     </div>
   )

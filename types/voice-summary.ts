@@ -9,6 +9,32 @@ export interface VoiceRecording {
   summary?: string
 }
 
+export interface DocumentSummary {
+  id: string
+  documentName: string
+  documentId: string
+  summary: string
+  wordCount: number
+  caseTitle?: string
+  caseId?: string
+  createdAt: string
+  uploadedBy: string
+  status: "ready" | "processing" | "error"
+}
+
+export interface Document {
+  id: string
+  name: string
+  type: string
+  size: number
+  status: "processed" | "processing" | "failed" | "pending"
+  caseTitle?: string
+  caseId?: string
+  uploadedBy: string
+  uploadedAt: string
+  url?: string
+}
+
 // Schema for voice recording
 export const voiceRecordingSchema = {
   title: {

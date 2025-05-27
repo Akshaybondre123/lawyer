@@ -1,122 +1,105 @@
-import type { VoiceRecording } from "@/types/voice-summary"
+import type { DocumentSummary } from "@/types/voice-summary"
 
 /**
- * Get voice recordings
+ * Get document summaries for TTS playback
  */
-export async function getVoiceRecordings(): Promise<VoiceRecording[]> {
+export async function getDocumentSummaries(): Promise<DocumentSummary[]> {
   // In a real app, this would call an API endpoint
   // This is a mock implementation for demonstration
 
-  // Mock data with local audio files that are guaranteed to work
-  const mockRecordings: VoiceRecording[] = [
+  const mockSummaries: DocumentSummary[] = [
     {
-      id: "rec_1",
-      title: "Acme Co.",
-      createdBy: "Harold",
-      createdAt: "2025-02-28T10:00:00Z",
-      duration: "02:25",
-      // Use a data URI for a silent audio file that's guaranteed to work
-      audioUrl:
-        "data:audio/mp3;base64,SUQzBAAAAAAAI1RTU0UAAAAPAAADTGF2ZjU4Ljc2LjEwMAAAAAAAAAAAAAAA/+M4wAAAAAAAAAAAAEluZm8AAAAPAAAAAwAAAbAAuLi4uLi4uLi4uLi4uLi4uLi4uLi44ODg4ODg4ODg4ODg4ODg4ODg4ODg4ODg//////////////////////////////////////////////////////////////////8AAAAATGF2YzU4LjEzAAAAAAAAAAAAAAAAJAX/////////////////////////////////////////",
-      transcription: "This is a mock transcription for the first recording.",
-      summary: "Summary of the first recording discussing Acme Co. business matters.",
+      id: "sum_1",
+      documentName: "Contract_Agreement_2024.pdf",
+      documentId: "doc_1",
+      summary:
+        "This contract agreement outlines the terms and conditions for legal services between the law firm and Acme Corporation. The agreement includes payment terms, scope of work, confidentiality clauses, and termination conditions. Key provisions include a retainer fee of $10,000, hourly billing at $350, and a 30-day notice period for termination.",
+      wordCount: 156,
+      caseTitle: "Acme Corp vs. Beta Inc.",
+      caseId: "case_1",
+      createdAt: "2025-02-28T10:30:00Z",
+      uploadedBy: "Harold",
+      status: "ready",
     },
     {
-      id: "rec_2",
-      title: "Acme Co.",
-      createdBy: "Harold",
-      createdAt: "2025-02-28T11:30:00Z",
-      duration: "02:25",
-      audioUrl:
-        "data:audio/mp3;base64,SUQzBAAAAAAAI1RTU0UAAAAPAAADTGF2ZjU4Ljc2LjEwMAAAAAAAAAAAAAAA/+M4wAAAAAAAAAAAAEluZm8AAAAPAAAAAwAAAbAAuLi4uLi4uLi4uLi4uLi4uLi4uLi44ODg4ODg4ODg4ODg4ODg4ODg4ODg4ODg//////////////////////////////////////////////////////////////////8AAAAATGF2YzU4LjEzAAAAAAAAAAAAAAAAJAX/////////////////////////////////////////",
-      transcription: "This is a mock transcription for the second recording.",
-      summary: "Summary of the second recording discussing Acme Co. project updates.",
-    },
-    {
-      id: "rec_3",
-      title: "Acme Co.",
-      createdBy: "Harold",
+      id: "sum_2",
+      documentName: "Financial_Report_Q4.xlsx",
+      documentId: "doc_2",
+      summary:
+        "The Q4 financial report shows significant revenue growth of 23% compared to the previous quarter. Total revenue reached $2.4 million with operating expenses of $1.8 million. The report highlights strong performance in the corporate law division and recommends expansion of the litigation department.",
+      wordCount: 98,
+      caseTitle: "Internal Financial Review",
+      caseId: "case_2",
       createdAt: "2025-02-28T14:15:00Z",
-      duration: "02:20",
-      audioUrl:
-        "data:audio/mp3;base64,SUQzBAAAAAAAI1RTU0UAAAAPAAADTGF2ZjU4Ljc2LjEwMAAAAAAAAAAAAAAA/+M4wAAAAAAAAAAAAEluZm8AAAAPAAAAAwAAAbAAuLi4uLi4uLi4uLi4uLi4uLi4uLi44ODg4ODg4ODg4ODg4ODg4ODg4ODg4ODg//////////////////////////////////////////////////////////////////8AAAAATGF2YzU4LjEzAAAAAAAAAAAAAAAAJAX/////////////////////////////////////////",
-      transcription: "This is a mock transcription for the third recording.",
-      summary: "Summary of the third recording discussing Acme Co. financial reports.",
+      uploadedBy: "Sarah",
+      status: "ready",
     },
     {
-      id: "rec_4",
-      title: "Acme Co.",
-      createdBy: "Harold",
-      createdAt: "2025-02-28T16:45:00Z",
-      duration: "02:20",
-      audioUrl:
-        "data:audio/mp3;base64,SUQzBAAAAAAAI1RTU0UAAAAPAAADTGF2ZjU4Ljc2LjEwMAAAAAAAAAAAAAAA/+M4wAAAAAAAAAAAAEluZm8AAAAPAAAAAwAAAbAAuLi4uLi4uLi4uLi4uLi4uLi4uLi44ODg4ODg4ODg4ODg4ODg4ODg4ODg4ODg//////////////////////////////////////////////////////////////////8AAAAATGF2YzU4LjEzAAAAAAAAAAAAAAAAJAX/////////////////////////////////////////",
-      transcription: "This is a mock transcription for the fourth recording.",
-      summary: "Summary of the fourth recording discussing Acme Co. client feedback.",
+      id: "sum_3",
+      documentName: "Witness_Statement_John_Doe.docx",
+      documentId: "doc_3",
+      summary:
+        "Witness statement from John Doe regarding the incident on January 15th. The witness confirms seeing the defendant at the location between 2:00 PM and 3:00 PM. Statement includes detailed timeline of events and corroborates the plaintiff's account of the incident.",
+      wordCount: 87,
+      caseTitle: "Smith vs. Johnson",
+      caseId: "case_3",
+      createdAt: "2025-02-27T16:45:00Z",
+      uploadedBy: "Michael",
+      status: "ready",
     },
     {
-      id: "rec_5",
-      title: "Acme Co.",
-      createdBy: "Harold",
-      createdAt: "2025-02-28T17:30:00Z",
-      duration: "02:35",
-      audioUrl:
-        "data:audio/mp3;base64,SUQzBAAAAAAAI1RTU0UAAAAPAAADTGF2ZjU4Ljc2LjEwMAAAAAAAAAAAAAAA/+M4wAAAAAAAAAAAAEluZm8AAAAPAAAAAwAAAbAAuLi4uLi4uLi4uLi4uLi4uLi4uLi44ODg4ODg4ODg4ODg4ODg4ODg4ODg4ODg//////////////////////////////////////////////////////////////////8AAAAATGF2YzU4LjEzAAAAAAAAAAAAAAAAJAX/////////////////////////////////////////",
-      transcription: "This is a mock transcription for the fifth recording.",
-      summary: "Summary of the fifth recording discussing Acme Co. marketing strategy.",
+      id: "sum_4",
+      documentName: "Legal_Precedent_Research.pdf",
+      documentId: "doc_4",
+      summary:
+        "Comprehensive research on legal precedents for intellectual property cases. The document covers 15 relevant cases from the past 5 years, analyzing court decisions and their implications for current litigation strategy. Key findings suggest a 78% success rate for similar cases.",
+      wordCount: 203,
+      caseTitle: "TechStart IP Dispute",
+      caseId: "case_4",
+      createdAt: "2025-02-27T11:20:00Z",
+      uploadedBy: "Emily",
+      status: "ready",
     },
   ]
 
   // Simulate network delay
   await new Promise((resolve) => setTimeout(resolve, 500))
 
-  return mockRecordings
+  return mockSummaries
 }
 
 /**
- * Record voice and upload
+ * Record voice and upload (keeping for backward compatibility)
  */
-export async function recordVoice(audioBlob: Blob): Promise<VoiceRecording> {
-  // In a real app, this would upload the audio file to a server
-  // This is a mock implementation for demonstration
-
-  // Simulate network delay
+export async function recordVoice(audioBlob: Blob): Promise<any> {
+  // This function is now deprecated but kept for compatibility
   await new Promise((resolve) => setTimeout(resolve, 1500))
-
-  // Use a data URI for a silent audio file that's guaranteed to work
-  const audioUrl =
-    "data:audio/mp3;base64,SUQzBAAAAAAAI1RTU0UAAAAPAAADTGF2ZjU4Ljc2LjEwMAAAAAAAAAAAAAAA/+M4wAAAAAAAAAAAAEluZm8AAAAPAAAAAwAAAbAAuLi4uLi4uLi4uLi4uLi4uLi4uLi44ODg4ODg4ODg4ODg4ODg4ODg4ODg4ODg//////////////////////////////////////////////////////////////////8AAAAATGF2YzU4LjEzAAAAAAAAAAAAAAAAJAX/////////////////////////////////////////"
-
-  // Return mock recording
   return {
     id: `rec_${Date.now()}`,
-    title: "Acme Co.",
+    title: "Voice Recording",
     createdBy: "Harold",
     createdAt: new Date().toISOString(),
-    duration: "00:30", // Mock duration
-    audioUrl,
-    transcription: "This is an automatically generated transcription of your recording.",
-    summary: "This is an automatically generated summary of your recording.",
+    duration: "00:30",
+    audioUrl: "",
+    transcription: "This feature has been moved to document summaries.",
+    summary: "Please use the document upload feature instead.",
   }
 }
 
 /**
- * Transcribe a recording
+ * Get voice recordings (deprecated)
  */
-export async function transcribeRecording(
-  recordingId: string,
-  options?: { language?: string },
-): Promise<{ transcription: string; summary: string }> {
-  // In a real app, this would call an API endpoint
-  // This is a mock implementation for demonstration
+export async function getVoiceRecordings(): Promise<any[]> {
+  return []
+}
 
-  // Simulate network delay
-  await new Promise((resolve) => setTimeout(resolve, 2000))
-
-  // Return mock transcription and summary
+/**
+ * Transcribe a recording (deprecated)
+ */
+export async function transcribeRecording(recordingId: string): Promise<any> {
   return {
-    transcription: "This is a mock transcription generated for recording " + recordingId,
-    summary: "This is a mock summary generated for recording " + recordingId,
+    transcription: "Feature deprecated",
+    summary: "Please use document summaries instead",
   }
 }
 
@@ -124,14 +107,9 @@ export async function transcribeRecording(
  * Download recording summary
  */
 export async function downloadSummary(recordingId: string): Promise<void> {
-  // In a real app, this would generate and download a file
-  // This is a mock implementation for demonstration
-
-  // Simulate network delay
   await new Promise((resolve) => setTimeout(resolve, 1000))
 
-  // Create a mock text file and trigger download
-  const text = "This is a mock summary for recording " + recordingId
+  const text = "This is a mock summary for document " + recordingId
   const blob = new Blob([text], { type: "text/plain" })
   const url = URL.createObjectURL(blob)
   const a = document.createElement("a")
@@ -144,15 +122,9 @@ export async function downloadSummary(recordingId: string): Promise<void> {
 }
 
 /**
- * Delete a recording
+ * Delete a recording (deprecated)
  */
 export async function deleteRecording(recordingId: string): Promise<void> {
-  // In a real app, this would call an API endpoint
-  // This is a mock implementation for demonstration
-
-  // Simulate network delay
   await new Promise((resolve) => setTimeout(resolve, 800))
-
-  // In a real implementation, this would delete the recording from the server
   console.log(`Deleted recording: ${recordingId}`)
 }

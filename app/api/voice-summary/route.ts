@@ -28,7 +28,7 @@ export async function GET(request: NextRequest) {
           transcription: "This is a mock transcription for the first recording.",
           summary: "Summary of the first recording discussing Acme Co. business matters.",
         },
-        // More recordings would be here
+        
       ],
     })
   } catch (error) {
@@ -49,7 +49,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
 
-    // In a real implementation:
+    
     // 1. Parse the form data
     const formData = await request.formData()
     const audioFile = formData.get("audio_file") as File

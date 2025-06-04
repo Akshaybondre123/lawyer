@@ -4,7 +4,7 @@ import ChatList from "@/components/chat/chat-list"
 import { getChats } from "@/lib/api/chat-api"
 
 export default async function ChatPage() {
-  // In a real app, this would use server-side data fetching
+  // this would use server-side data fetching
   const chats = await getChats()
 
   return (

@@ -36,7 +36,7 @@ export async function uploadFile({
   storageLocation,
   metadata = {},
 }: UploadFileParams): Promise<UploadResult> {
-  // In a real implementation, this would use AWS SDK or other APIs
+  // this would use AWS SDK or other APIs
   // This is a mock implementation for demonstration
 
   return new Promise((resolve) => {

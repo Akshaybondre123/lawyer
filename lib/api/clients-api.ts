@@ -17,7 +17,7 @@ export async function getClients({
   page = 1,
   limit = 10,
 }: GetClientsParams = {}): Promise<Client[]> {
-  // In a real app, this would call an API endpoint
+  // this would call an API endpoint
   // This is a mock implementation for demonstration
 
   // Mock data
@@ -166,7 +166,7 @@ export async function getClientById(id: string): Promise<Client | null> {
  * Toggle a client's favorite status
  */
 export async function toggleFavorite(id: string, isFavorite: boolean): Promise<Client> {
-  // In a real app, this would call an API endpoint
+  // this would call an API endpoint
 
   // Simulate network delay
   await new Promise((resolve) => setTimeout(resolve, 500))
@@ -188,7 +188,7 @@ export async function toggleFavorite(id: string, isFavorite: boolean): Promise<C
  * Toggle a client's blocked status
  */
 export async function toggleBlocked(id: string, isBlocked: boolean): Promise<Client> {
-  // In a real app, this would call an API endpoint
+  //  this would call an API endpoint
 
   // Simulate network delay
   await new Promise((resolve) => setTimeout(resolve, 500))
@@ -210,7 +210,7 @@ export async function toggleBlocked(id: string, isBlocked: boolean): Promise<Cli
  * Update a client's status
  */
 export async function updateClientStatus(id: string, status: ClientStatus): Promise<Client> {
-  // In a real app, this would call an API endpoint
+  // this would call an API endpoint
 
   // Simulate network delay
   await new Promise((resolve) => setTimeout(resolve, 800))
@@ -232,7 +232,7 @@ export async function updateClientStatus(id: string, status: ClientStatus): Prom
  * Update a client's notes
  */
 export async function updateClientNotes(id: string, notes: string): Promise<Client> {
-  // In a real app, this would call an API endpoint
+  // this would call an API endpoint
 
   // Simulate network delay
   await new Promise((resolve) => setTimeout(resolve, 800))
@@ -254,7 +254,7 @@ export async function updateClientNotes(id: string, notes: string): Promise<Clie
  * Get cases for a specific client
  */
 export async function getClientCases(clientId: string): Promise<Case[]> {
-  // In a real app, this would call an API endpoint
+  // this would call an API endpoint
 
   // Simulate network delay
   await new Promise((resolve) => setTimeout(resolve, 700))
@@ -301,7 +301,7 @@ export async function getClientCases(clientId: string): Promise<Case[]> {
  * Create a new client
  */
 export async function createClient(clientData: Partial<Client>): Promise<Client> {
-  // In a real app, this would call an API endpoint
+  // this would call an API endpoint
 
   // Simulate network delay
   await new Promise((resolve) => setTimeout(resolve, 1000))

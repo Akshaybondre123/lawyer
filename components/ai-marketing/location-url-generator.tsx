@@ -76,7 +76,7 @@ export default function LocationUrlGenerator({ postTitle, onUrlGenerated, onQrGe
 
     const fullUrl = `${baseUrl}?${params.toString()}`
 
-    // Short URL format with comma-separated values
+    // Short URL format 
     const parts = [
       location.planet || "Earth",
       location.latitude,

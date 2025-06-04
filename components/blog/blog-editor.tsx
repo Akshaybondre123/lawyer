@@ -37,7 +37,7 @@ export default function BlogEditor({ postId }: { postId?: string }) {
 
   useEffect(() => {
     if (postId) {
-      // In a real app, fetch the post data from API
+      // Than fetch the post data from API
       // For now, we'll use mock data
       setPost({
         id: postId,

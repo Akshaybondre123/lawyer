@@ -1,7 +1,7 @@
 import type { BlogPost } from "@/types/blog"
 
 // This is a mock API service for the blog functionality
-// In a real application, these functions would make actual API calls
+//these functions would make actual API calls
 
 // Mock data
 const BLOG_POSTS: BlogPost[] = [
@@ -24,7 +24,7 @@ const BLOG_POSTS: BlogPost[] = [
     likes: 24,
     views: 156,
   },
-  // Add more mock posts as needed
+  
 ]
 
 export async function getBlogPosts(): Promise<BlogPost[]> {
@@ -77,7 +77,7 @@ export async function updateBlogPost(id: string, updates: Partial<BlogPost>): Pr
 export async function deleteBlogPost(id: string): Promise<void> {
   // Simulate API delay
   await new Promise((resolve) => setTimeout(resolve, 1000))
-  // In a real app, this would delete the post from the database
+  // this would delete the post from the database
 }
 
 export async function likeBlogPost(id: string): Promise<{ likes: number }> {

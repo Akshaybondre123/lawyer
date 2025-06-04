@@ -1,7 +1,7 @@
 import type { SubscriptionPlan, TokenBundle, SubscriptionInvoice, SubscriptionState } from "@/types/subscription"
 
 // Mock API functions for subscription management
-// In a real application, these would make actual API calls to your backend
+//  these would make actual API calls to your backend
 
 export async function getCurrentSubscription(): Promise<SubscriptionState> {
   // Simulate API call

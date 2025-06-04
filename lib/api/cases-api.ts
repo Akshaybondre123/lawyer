@@ -16,7 +16,7 @@ export async function getCases({
   page = 1,
   limit = 10,
 }: GetCasesParams = {}): Promise<Case[]> {
-  // In a real app, this would call an API endpoint
+  // this would call an API endpoint
   // This is a mock implementation for demonstration
 
   // Mock data
@@ -122,7 +122,7 @@ export async function getCases({
  * Get a case by ID
  */
 export async function getCaseById(id: string): Promise<Case | null> {
-  // In a real app, this would call an API endpoint
+  // this would call an API endpoint
   const cases = await getCases({ limit: 100 })
   const caseData = cases.find((c) => c.id === id)
 
@@ -140,7 +140,7 @@ export async function getCaseById(id: string): Promise<Case | null> {
  * Update a case's status
  */
 export async function updateCaseStatus(id: string, status: CaseStatus): Promise<Case> {
-  // In a real app, this would call an API endpoint
+  // this would call an API endpoint
 
   // Simulate network delay
   await new Promise((resolve) => setTimeout(resolve, 800))
@@ -163,7 +163,7 @@ export async function updateCaseStatus(id: string, status: CaseStatus): Promise<
  * Create a new case
  */
 export async function createCase(caseData: Partial<Case>): Promise<Case> {
-  // In a real app, this would call an API endpoint
+  // this would call an API endpoint
 
   // Simulate network delay
   await new Promise((resolve) => setTimeout(resolve, 1000))

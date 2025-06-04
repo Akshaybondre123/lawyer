@@ -59,7 +59,7 @@ export default function QAAnswerForm({
   })
 
   useEffect(() => {
-    // In a real app, fetch the question data from API
+    // this would in real app fetch the question data from API
     const fetchQuestion = async () => {
       try {
         await new Promise((resolve) => setTimeout(resolve, 500))
@@ -82,7 +82,7 @@ export default function QAAnswerForm({
     setError(null)
 
     try {
-      // Example API call structure for backend team
+      // Example API call structure for backend person
       const response = await fetch(`/api/qa/${questionId}/answer`, {
         method: isEditing ? "PUT" : "POST",
         headers: {

@@ -1,7 +1,7 @@
 import type { QAItem } from "@/types/qa"
 
 // This is a mock API service for the Q&A functionality
-// In a real application, these functions would make actual API calls
+// these functions would make actual API calls
 
 // Mock data
 const QA_ITEMS: QAItem[] = [
@@ -22,7 +22,7 @@ const QA_ITEMS: QAItem[] = [
     category: "family-law",
     tags: ["divorce", "custody"],
   },
-  // Add more mock items as needed
+  
 ]
 
 export async function getQAItems(): Promise<QAItem[]> {

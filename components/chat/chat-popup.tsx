@@ -60,7 +60,7 @@ export function ChatPopup({ onClose, clientId }: ChatPopupProps) {
 
   const watchedContent = messageForm.watch("content")
 
-  // Calculate tokens for the current message (approximately 4 chars = 1 token)
+  //Calculate tokens for the current message approximately 4 chars = 1 token
   useEffect(() => {
     setTokenCount(Math.ceil(watchedContent.length / 4))
   }, [watchedContent])

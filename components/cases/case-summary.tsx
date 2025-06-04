@@ -5,7 +5,7 @@ interface CaseSummaryProps {
 }
 
 export default function CaseSummary({ caseId }: CaseSummaryProps) {
-  // In a real app, this would fetch the case summary from an API
+  //  this would fetch the case summary from an API
   return (
     <Card>
       <CardContent className="p-6 space-y-4">

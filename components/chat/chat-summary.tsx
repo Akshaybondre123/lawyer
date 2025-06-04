@@ -26,12 +26,12 @@ export function ChatSummary({ messages, onBack }: ChatSummaryProps) {
       return "No substantial conversation to summarize."
     }
 
-    // In a real application, this would use AI to generate a proper summary
+    //  this would use AI to generate a proper summary
     // For now, we'll just return a simple placeholder
     return "This conversation covered legal consultation topics. The client asked questions about their case, and the AI assistant provided guidance and information."
   }
 
-  // Extract key points (in a real app, this would be AI-generated)
+  // Extract key points in a real app, this would be AI-generated
   const keyPoints = [
     "Client inquired about legal procedures",
     "Information was provided about documentation requirements",

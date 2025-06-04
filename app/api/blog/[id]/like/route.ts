@@ -1,7 +1,7 @@
 import { type NextRequest, NextResponse } from "next/server"
 import type { BlogPost } from "@/types/blog"
 
-// Mock data - in a real app, this would come from a database
+// Mock data 
 const blogPosts: BlogPost[] = [
   {
     id: "1",
@@ -22,7 +22,7 @@ const blogPosts: BlogPost[] = [
     likes: 24,
     views: 156,
   },
-  // Add more mock posts as needed
+  
 ]
 
 export async function POST(request: NextRequest, { params }: { params: { id: string } }) {

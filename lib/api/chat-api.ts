@@ -10,7 +10,7 @@ interface GetChatsParams {
  * Get chat summaries with optional filtering
  */
 export async function getChats({ query = "", page = 1, limit = 10 }: GetChatsParams = {}): Promise<ChatSummary[]> {
-  // In a real app, this would call an API endpoint
+  // this would call an API endpoint
   // This is a mock implementation for demonstration
 
   // Mock data
@@ -95,7 +95,7 @@ export async function getChats({ query = "", page = 1, limit = 10 }: GetChatsPar
  * Get messages for a specific chat
  */
 export async function getMessages(clientId: string): Promise<Message[]> {
-  // In a real app, this would call an API endpoint
+  // this would call an API endpoint
   // This is a mock implementation for demonstration
 
   // Simulate network delay
@@ -156,7 +156,7 @@ export async function getMessages(clientId: string): Promise<Message[]> {
  * Send a message
  */
 export async function sendMessage(message: Message): Promise<Message> {
-  // In a real app, this would call an API endpoint
+  // this would call an API endpoint
   // This is a mock implementation for demonstration
 
   // Simulate network delay
@@ -173,13 +173,13 @@ export async function sendMessage(message: Message): Promise<Message> {
  * Mark messages as read
  */
 export async function markAsRead(messageIds: string[]): Promise<void> {
-  // In a real app, this would call an API endpoint
+  //this would call an API endpoint
   // This is a mock implementation for demonstration
 
   // Simulate network delay
   await new Promise((resolve) => setTimeout(resolve, 300))
 
-  // In a real implementation, this would update the messages in the database
+  //this would update the messages in the database
   console.log(`Marked messages as read: ${messageIds.join(", ")}`)
 }
 
@@ -187,13 +187,13 @@ export async function markAsRead(messageIds: string[]): Promise<void> {
  * End a chat session
  */
 export async function endChatSession(clientId: string): Promise<void> {
-  // In a real app, this would call an API endpoint
+  // this would call an API endpoint
   // This is a mock implementation for demonstration
 
   // Simulate network delay
   await new Promise((resolve) => setTimeout(resolve, 800))
 
-  // In a real implementation, this would update the chat session in the database
+  // this would update the chat session in the database
   console.log(`Ended chat session with client: ${clientId}`)
 }
 
@@ -205,7 +205,7 @@ export async function getChatSummary(clientId: string): Promise<{
   keyPoints: string[]
   tokenUsage: number
 }> {
-  // In a real app, this would call an API endpoint
+  // this would call an API endpoint
   // This is a mock implementation for demonstration
 
   // Simulate network delay

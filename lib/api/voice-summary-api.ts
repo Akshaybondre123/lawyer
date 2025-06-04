@@ -4,7 +4,7 @@ import type { DocumentSummary } from "@/types/voice-summary"
  * Get document summaries for TTS playback
  */
 export async function getDocumentSummaries(): Promise<DocumentSummary[]> {
-  // In a real app, this would call an API endpoint
+  // this would call an API endpoint
   // This is a mock implementation for demonstration
 
   const mockSummaries: DocumentSummary[] = [

@@ -37,7 +37,7 @@ export default function QANewForm() {
 
   const onSubmit = async (data: QAFormData) => {
     try {
-      // Example API call structure for backend team
+      // Example API call structure for backend Person
       const response = await fetch("/api/qa", {
         method: "POST",
         headers: {

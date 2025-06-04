@@ -2,7 +2,7 @@ import type { User } from "../types/user"
 
 /**
  * Get the current authenticated user
- * In a real app, this would use NextAuth or similar
+ *  this would use NextAuth or similar
  */
 export async function getCurrentUser(): Promise<User> {
   // Mock implementation

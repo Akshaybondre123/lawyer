@@ -4,7 +4,7 @@ import type { ProcessedFile, SecureLinkOptions, SecureLinkResult } from "@/types
  * Process a file for text extraction
  */
 export async function processFile(file: File): Promise<ProcessedFile> {
-  // In a real implementation, this would call an API endpoint
+  //  this would call an API endpoint
   // This is a mock implementation for demonstration
 
   // Determine processing method based on file type
@@ -55,7 +55,7 @@ Would you like a version tailored for a business, brand, or personal account?`
  * Generate a summary for a processed file
  */
 export async function generateSummary(fileId: string): Promise<{ summary: string }> {
-  // In a real implementation, this would call an API endpoint
+  // this would call an API endpoint
   // This is a mock implementation for demonstration
 
   // Simulate network delay for AI processing
@@ -72,7 +72,7 @@ export async function generateSummary(fileId: string): Promise<{ summary: string
  * Download a summary
  */
 export async function downloadSummary(fileId: string): Promise<void> {
-  // In a real implementation, this would generate and download a file
+  // this would generate and download a file
   // This is a mock implementation for demonstration
 
   // Simulate network delay
@@ -96,13 +96,13 @@ export async function downloadSummary(fileId: string): Promise<void> {
  * Save a summary to a case
  */
 export async function saveToCase(fileId: string, caseId: string): Promise<void> {
-  // In a real implementation, this would call an API endpoint
+  //this would call an API endpoint
   // This is a mock implementation for demonstration
 
   // Simulate network delay
   await new Promise((resolve) => setTimeout(resolve, 1500))
 
-  // In a real app, this would save the file to the case in the database
+  // this would save the file to the case in the database
   console.log(`Saved file ${fileId} to case ${caseId}`)
 }
 
@@ -110,7 +110,7 @@ export async function saveToCase(fileId: string, caseId: string): Promise<void> 
  * Generate a secure link for file sharing
  */
 export async function generateSecureLink(options: SecureLinkOptions): Promise<SecureLinkResult> {
-  // In a real implementation, this would call an API endpoint
+  //  this would call an API endpoint
   // This is a mock implementation for demonstration
 
   // Simulate network delay

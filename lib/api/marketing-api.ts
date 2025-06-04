@@ -8,7 +8,7 @@ export async function generateLegalContent({
   contentType,
   options = {},
 }: GenerateContentParams): Promise<LegalPost> {
-  // In a real app, this would call an API endpoint
+  // this would call an API endpoint
   // This is a mock implementation for demonstration
 
   // Simulate network delay for AI generation
@@ -63,16 +63,22 @@ export async function generateLegalContent({
  * Publish post to social media platforms
  */
 export async function publishPost({ postId, platforms, targetRegion, scheduledFor }: PublishPostParams): Promise<void> {
-  // In a real app, this would call an API endpoint
+  // this would call an API endpoint
   // This is a mock implementation for demonstration
 
   // Simulate network delay
   await new Promise((resolve) => setTimeout(resolve, 1500))
 
-  // In a real implementation, this would:
+  // this would:
   // 1. Retrieve the post from the database
+
+
   // 2. Format the post for each platform
+
+
   // 3. Use Ayrshare or similar API to publish to each platform
+
+  
   // 4. Update the post status in the database
 
   console.log(`Published post ${postId} to platforms: ${platforms.join(", ")} for region: ${targetRegion}`)

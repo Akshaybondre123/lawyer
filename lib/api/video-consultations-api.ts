@@ -12,7 +12,7 @@ interface VideoConsultation {
  * Get video consultations
  */
 export async function getVideoConsultations(): Promise<VideoConsultation[]> {
-  // In a real app, this would call an API endpoint
+  //this would call an API endpoint
   // This is a mock implementation for demonstration
 
   // Mock data
@@ -80,7 +80,7 @@ export async function scheduleVideoConsultation(data: {
   clientId: string
   scheduledTime: string
 }): Promise<VideoConsultation> {
-  // In a real app, this would call an API endpoint
+  // this would call an API endpoint
   // This is a mock implementation for demonstration
 
   // Simulate network delay
@@ -103,7 +103,7 @@ export async function rescheduleVideoConsultation(
   consultationId: string,
   newScheduledTime: string,
 ): Promise<VideoConsultation> {
-  // In a real app, this would call an API endpoint
+  // this would call an API endpoint
   // This is a mock implementation for demonstration
 
   // Simulate network delay
@@ -123,12 +123,12 @@ export async function rescheduleVideoConsultation(
  * Cancel a video consultation
  */
 export async function cancelVideoConsultation(consultationId: string): Promise<void> {
-  // In a real app, this would call an API endpoint
+  // this would call an API endpoint
   // This is a mock implementation for demonstration
 
   // Simulate network delay
   await new Promise((resolve) => setTimeout(resolve, 800))
 
-  // In a real implementation, this would update the consultation in the database
+  //  this would update the consultation in the database
   console.log(`Cancelled consultation: ${consultationId}`)
 }

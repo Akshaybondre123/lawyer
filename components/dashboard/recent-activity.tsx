@@ -25,7 +25,7 @@ function ActivityItem({ icon, title, description, time, iconColor = "bg-gray-100
 }
 
 export default function RecentActivity() {
-  // In a real app, these would come from an API
+  // these would come from an API
   const activities = [
     {
       icon: <MessageSquare size={16} />,
